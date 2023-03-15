@@ -1,37 +1,26 @@
 # spring-cloud-websocket-cluster
 
 #### 介绍
+
 基于spring-cloud与redis的websocket集群解决方案
 
 #### 软件架构
-软件架构说明
 
+本项目基于spring-cloud 与 redis 做出的websocket集群方案
 
-#### 安装教程
+#### 需要第三方服务
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1. nacos
+2. redis
 
 #### 使用说明
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1. ws子项目为websocket服务，可以启动多个
+2. ws-facade子项目为发送消息包，需要通过websocket推送消息的直接在项目种引入，然后调用PushService下面的pushMessage方法
+3. web子项目为调用实例，可以参考
 
-#### 参与贡献
+#### 项目优势
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
-
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+1. 传统websocket集群服务服务端给客户端发送消息，需要采用MQ进行广播发送，每个websocket服务都要接收消息，然后解析发送，这种方案链路太长，同时严重浪费性能
+2. 本项目直接通过feign接口调用的方式，直接将消息发送到用户链接的socket服务上，不需要走第三方服务
+3. 待更新
