@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.jyn</groupId>
-        <artifactId>jyn-base</artifactId>
+        <groupId>com.lp</groupId>
+        <artifactId>websocket-cluster</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
@@ -31,45 +31,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
-        <!--mysql相关-->
-        <dependency>
-            <groupId>org.mybatis.spring.boot</groupId>
-            <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>3.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>8.0.32</version>
-        </dependency>
-        <!--通用mapper -->
-        <dependency>
-            <groupId>tk.mybatis</groupId>
-            <artifactId>mapper-spring-boot-starter</artifactId>
-            <version>4.2.2</version>
-        </dependency>
-        <!--分页组件 -->
-        <dependency>
-            <groupId>com.github.pagehelper</groupId>
-            <artifactId>pagehelper-spring-boot-starter</artifactId>
-            <version>1.4.6</version>
-        </dependency>
         <!--redis-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson-spring-boot-starter</artifactId>
-            <version>3.17.7</version>
-        </dependency>
-        <!--文档-->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.15</version>
-        </dependency>
+
         <!--参数校验-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -101,7 +68,7 @@
         </dependency>
         <!--webSocket推送-->
         <dependency>
-            <groupId>com.jyn</groupId>
+            <groupId>com.lp</groupId>
             <artifactId>ws-facade</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>

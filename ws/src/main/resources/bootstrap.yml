@@ -3,20 +3,9 @@ spring:
     #随机名字，做ws集群使用
     name: ${SpringApplicationName}
   redis:
-    host: sys10-dev.juyoun.net
-    password: qwe123
+    host: 192.168.137.174
   cloud:
     nacos:
-      server-addr: 127.0.0.1
+      server-addr: 192.168.137.174
       config:
         file-extension: yaml
-
-#性能监控
-management:
-  endpoint:
-    prometheus:
-      enabled: true
-  endpoints:
-    web:
-      exposure:
-        include: '*'

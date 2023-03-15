@@ -1,67 +1,16 @@
 spring:
   application:
     name: web
-  datasource:
-    url: jdbc:mysql://sys10-dev.juyoun.net:3306/jyn_game
-    username: root
-    password: 4H*fDTmd3^X^ogV1
-    driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
-    host: sys10-dev.juyoun.net
-    password: qwe123
+    host: 192.168.137.174
   cloud:
     nacos:
-      server-addr: 127.0.0.1
+      server-addr: 192.168.137.174
       config:
         file-extension: yaml
-#        extension-configs:
-#          - data-id: datasource.yaml
-#            refresh: true
-#          - data-id: mybatis-plus.yaml
-#            refresh: true
 server:
   port: 8081
 
-mybatis:
-  type-aliases-package: com.jyn.entity
-  mapper-locations: classpath:mapper/*.xml
-
-#通用mapper
-mapper:
-  mappers:
-    - tk.mybatis.mapper.common.Mapper
-    - com.jyn.util.MyMapper
-  notEmpty: true
-  identity: MYSQL
-
-#分页
-pagehelper:
-  helperDialect: mysql
-  reasonable: true
-  supportMethodsArguments: true
-  params: count=countSql
-
-#文档
-springdoc:
-  api-docs:
-    #是否开启文档功能
-    enabled: true
-    #swagger后端请求地址
-    path: /v3/api-doc
-  swagger-ui:
-    #自定义swagger前端请求路径，输入http：127.0.0.1:8080/swagger-ui会自动重定向到swagger页面
-    path: /swagger-ui
-
-#性能监控
-management:
-  endpoint:
-    prometheus:
-      enabled: true
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-
 logging:
   level:
-    com.jyn.feign: debug
+    com.lp.feign: debug

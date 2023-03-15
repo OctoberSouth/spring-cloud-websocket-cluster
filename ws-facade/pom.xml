@@ -4,12 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.jyn</groupId>
-        <artifactId>jyn-base</artifactId>
+        <groupId>com.lp</groupId>
+        <artifactId>websocket-cluster</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.jyn</groupId>
+    <groupId>com.lp</groupId>
     <artifactId>ws-facade</artifactId>
     <version>1.0-SNAPSHOT</version>
 
