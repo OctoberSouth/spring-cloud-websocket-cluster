@@ -12,6 +12,7 @@
         <module>web</module>
         <module>ws</module>
         <module>ws-facade</module>
+        <module>gateway</module>
     </modules>
 
     <parent>
@@ -37,6 +38,10 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>5.8.15</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
         <!--   JSON处理工具类，hutool JSON性能不好，不要使用     -->
         <dependency>

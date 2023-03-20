@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      server-addr: 192.168.137.174
+      config:
+        file-extension: yaml
+

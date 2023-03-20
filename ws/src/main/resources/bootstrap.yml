@@ -2,6 +2,7 @@ spring:
   application:
     #随机名字，做ws集群使用
     name: ${SpringApplicationName}
+  #    name: ws
   redis:
     host: 192.168.137.174
   cloud:
@@ -9,3 +10,6 @@ spring:
       server-addr: 192.168.137.174
       config:
         file-extension: yaml
+
+server:
+  port: 9090
