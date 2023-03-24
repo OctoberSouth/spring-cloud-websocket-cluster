@@ -41,6 +41,11 @@ public class WebSocketGatewayFilter implements GatewayFilter {
     }
 
 
+    /**
+     * 随机获取一个socket服务名
+     *
+     * @return
+     */
     private String getName() {
         NamingService naming;
         List<String> servicesOfServer;
