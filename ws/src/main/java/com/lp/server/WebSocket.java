@@ -12,18 +12,19 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 /**
  * @author 10263
  */
 @Component
 @ServerEndpoint("/ws/{userId}")
-public class MyWebSocket {
+public class WebSocket {
 
     /**
      * 存放用户信息
      */
-    private static final ConcurrentHashMap<Long, MyWebSocket> WEB_SOCKET_MAP = new ConcurrentHashMap<>(16);
+    private static final ConcurrentHashMap<Long, WebSocket> WEB_SOCKET_MAP = new ConcurrentHashMap<>(16);
     /**
      * session
      */
@@ -111,12 +112,42 @@ public class MyWebSocket {
      * @return
      */
     public static void sendMessage(Long userId, JSONObject message) {
-        MyWebSocket webSocket = WEB_SOCKET_MAP.get(userId);
+        WebSocket webSocket = WEB_SOCKET_MAP.get(userId);
         if (webSocket != null) {
             synchronized (webSocket.session) {
                 webSocket.session.getAsyncRemote().sendText(JSONObject.toJSONString(message));
             }
         }
+    }
+
+    /**
+     * 有返回的发送消息
+     *
+     * @param userId
+     * @param message
+     * @return
+     */
+    public static Future<Void> sendMessageFuture(Long userId, JSONObject message) {
+        WebSocket webSocket = WEB_SOCKET_MAP.get(userId);
+        if (webSocket != null) {
+            synchronized (webSocket.session) {
+                return webSocket.session.getAsyncRemote().sendText(JSONObject.toJSONString(message));
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 群发消息
+     *
+     * @param message
+     */
+    public static void sendMessage(JSONObject message) {
+        WEB_SOCKET_MAP.forEach((k, v) -> {
+            synchronized (v.session) {
+                v.session.getAsyncRemote().sendText(JSONObject.toJSONString(message));
+            }
+        });
     }
 
 }

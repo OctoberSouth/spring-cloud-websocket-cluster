@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.concurrent.Future;
+
 /**
  * @author 10263
  */
@@ -22,4 +24,24 @@ public interface PushFeign {
      */
     @PostMapping(value = "//{serviceName}/push/{userId}")
     void pushMessage(@PathVariable String serviceName, @PathVariable Long userId, @RequestBody JSONObject message);
+
+    /**
+     * 群发
+     *
+     * @param serviceName
+     * @param message
+     */
+    @PostMapping(value = "//{serviceName}")
+    void pushMessage(@PathVariable String serviceName, @RequestBody JSONObject message);
+
+    /**
+     * 有返回发送
+     *
+     * @param serviceName
+     * @param userId
+     * @param message
+     * @return
+     */
+    @PostMapping("//{serviceName}/future/{userId}")
+    Future<Void> pushMessageFuture(@PathVariable String serviceName, @PathVariable Long userId, @RequestBody JSONObject message);
 }
