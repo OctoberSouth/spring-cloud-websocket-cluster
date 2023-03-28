@@ -4,10 +4,10 @@ spring:
     name: ${SpringApplicationName}
   #    name: ws
   redis:
-    host: 192.168.137.174
+    host: 127.0.0.1
   cloud:
     nacos:
-      server-addr: 192.168.137.174
+      server-addr: 127.0.0.1
       config:
         file-extension: yaml
 

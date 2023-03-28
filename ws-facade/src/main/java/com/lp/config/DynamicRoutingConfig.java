@@ -27,7 +27,6 @@ public class DynamicRoutingConfig {
                 template.target(url);
                 // 这里需要把uri置空，不置空会变成两个， http://test//test?param=1
                 template.uri("");
-                System.out.println(url);
             }
         };
     }
