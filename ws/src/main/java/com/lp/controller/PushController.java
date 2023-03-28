@@ -1,7 +1,7 @@
 package com.lp.controller;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.lp.server.WebSocket;
+import com.lp.socket.WebSocket;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.Future;

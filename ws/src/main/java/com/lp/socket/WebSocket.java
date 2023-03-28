@@ -1,4 +1,4 @@
-package com.lp.server;
+package com.lp.socket;
 
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
@@ -100,7 +100,7 @@ public class WebSocket {
     @OnMessage
     public void onMessage(Session session, String message) throws IOException {
         System.out.println(message);
-        session.getBasicRemote().sendText("Hello Netty!");
+        session.getBasicRemote().sendText("收到你的消息了!" + message);
     }
 
 
