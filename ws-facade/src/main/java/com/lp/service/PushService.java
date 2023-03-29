@@ -3,10 +3,10 @@ package com.lp.service;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.lp.feign.PushFeign;
+import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Future;

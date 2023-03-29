@@ -3,9 +3,8 @@ package com.lp.controller;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.lp.service.PushService;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
 
 /**
  * @author 10263
