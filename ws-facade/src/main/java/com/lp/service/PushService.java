@@ -17,16 +17,14 @@ import java.util.concurrent.Future;
 @Service
 public class PushService {
 
-    @Resource
-    private PushFeign pushFeign;
-
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
-
     /**
      * 静态常量
      */
     private static final String SOCKET_USER_SPRING_APPLICATION_NAME = "ws:socket:user:spring:application:name";
+    @Resource
+    private PushFeign pushFeign;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 发送消息

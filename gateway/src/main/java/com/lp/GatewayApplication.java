@@ -21,5 +21,5 @@ public class GatewayApplication implements CommandLineRunner {
         System.out.println("项目启动完毕");
     }
 
-    
+
 }

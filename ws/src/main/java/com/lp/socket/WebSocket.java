@@ -26,20 +26,62 @@ public class WebSocket {
      */
     private static final ConcurrentHashMap<Long, WebSocket> WEB_SOCKET_MAP = new ConcurrentHashMap<>(16);
     /**
-     * session
-     */
-    private Session session;
-
-    private Long userId;
-
-    private String applicationName = System.getProperty("SpringApplicationName");
-
-    private StringRedisTemplate stringRedisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
-
-    /**
      * 静态常量
      */
     private static final String SOCKET_USER_SPRING_APPLICATION_NAME = "ws:socket:user:spring:application:name";
+    /**
+     * session
+     */
+    private Session session;
+    private Long userId;
+    private String applicationName = System.getProperty("SpringApplicationName");
+    private StringRedisTemplate stringRedisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
+
+    /**
+     * 实现服务器主动推送
+     *
+     * @param userId
+     * @param message
+     * @return
+     */
+    public static void sendMessage(Long userId, JSONObject message) {
+        WebSocket webSocket = WEB_SOCKET_MAP.get(userId);
+        if (webSocket != null) {
+            synchronized (webSocket.session) {
+                webSocket.session.getAsyncRemote().sendText(JSONObject.toJSONString(message));
+            }
+        }
+    }
+
+    /**
+     * 有返回的发送消息
+     *
+     * @param userId
+     * @param message
+     * @return
+     */
+    public static Future<Void> sendMessageFuture(Long userId, JSONObject message) {
+        WebSocket webSocket = WEB_SOCKET_MAP.get(userId);
+        if (webSocket != null) {
+            synchronized (webSocket.session) {
+                return webSocket.session.getAsyncRemote().sendText(JSONObject.toJSONString(message));
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 群发消息
+     *
+     * @param message
+     */
+    public static void sendMessage(JSONObject message) {
+        WEB_SOCKET_MAP.forEach((k, v) -> {
+            synchronized (v.session) {
+                v.session.getAsyncRemote().sendText(JSONObject.toJSONString(message));
+            }
+        });
+    }
 
     /**
      * 当有新的WebSocket连接完成时
@@ -101,53 +143,6 @@ public class WebSocket {
     public void onMessage(Session session, String message) throws IOException {
         System.out.println(message);
         session.getBasicRemote().sendText("收到你的消息了!" + message);
-    }
-
-
-    /**
-     * 实现服务器主动推送
-     *
-     * @param userId
-     * @param message
-     * @return
-     */
-    public static void sendMessage(Long userId, JSONObject message) {
-        WebSocket webSocket = WEB_SOCKET_MAP.get(userId);
-        if (webSocket != null) {
-            synchronized (webSocket.session) {
-                webSocket.session.getAsyncRemote().sendText(JSONObject.toJSONString(message));
-            }
-        }
-    }
-
-    /**
-     * 有返回的发送消息
-     *
-     * @param userId
-     * @param message
-     * @return
-     */
-    public static Future<Void> sendMessageFuture(Long userId, JSONObject message) {
-        WebSocket webSocket = WEB_SOCKET_MAP.get(userId);
-        if (webSocket != null) {
-            synchronized (webSocket.session) {
-                return webSocket.session.getAsyncRemote().sendText(JSONObject.toJSONString(message));
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 群发消息
-     *
-     * @param message
-     */
-    public static void sendMessage(JSONObject message) {
-        WEB_SOCKET_MAP.forEach((k, v) -> {
-            synchronized (v.session) {
-                v.session.getAsyncRemote().sendText(JSONObject.toJSONString(message));
-            }
-        });
     }
 
 }
