@@ -1,6 +1,5 @@
 package com.lp.controller;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.lp.socket.WebSocket;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +16,7 @@ public class PushController {
 
 
     @PostMapping("{userId}")
-    public void pushMessage(@PathVariable Long userId, @RequestBody JSONObject message) {
+    public void pushMessage(@PathVariable Long userId, @RequestBody Object message) {
         WebSocket.sendMessage(userId, message);
     }
 
@@ -27,7 +26,7 @@ public class PushController {
      * @param message
      */
     @PostMapping()
-    public void pushMessage(@RequestBody JSONObject message) {
+    public void pushMessage(@RequestBody Object message) {
         WebSocket.sendMessage(message);
     }
 
@@ -39,7 +38,7 @@ public class PushController {
      * @return
      */
     @PostMapping("future/{userId}")
-    public Future<Void> pushMessageFuture(@PathVariable Long userId, @RequestBody JSONObject message) {
+    public Future<Void> pushMessageFuture(@PathVariable Long userId, @RequestBody Object message) {
         return WebSocket.sendMessageFuture(userId, message);
     }
 }

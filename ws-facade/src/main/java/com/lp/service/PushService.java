@@ -1,7 +1,6 @@
 package com.lp.service;
 
 
-import com.alibaba.fastjson2.JSONObject;
 import com.lp.feign.PushFeign;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -32,7 +31,7 @@ public class PushService {
      * @param userId
      * @param message
      */
-    public void pushMessage(Long userId, JSONObject message) {
+    public void pushMessage(Long userId, Object message) {
         Object serviceName = this.stringRedisTemplate.opsForHash().get(SOCKET_USER_SPRING_APPLICATION_NAME, userId + "");
         if (serviceName != null) {
             this.pushFeign.pushMessage(serviceName.toString(), userId, message);
@@ -44,7 +43,7 @@ public class PushService {
      *
      * @param message
      */
-    public void pushMessage(JSONObject message) {
+    public void pushMessage(Object message) {
         Set<Object> serviceNameSet = new HashSet<>(this.stringRedisTemplate.opsForHash().values(SOCKET_USER_SPRING_APPLICATION_NAME));
         serviceNameSet.forEach(e -> this.pushFeign.pushMessage(e.toString(), message));
     }
@@ -56,7 +55,7 @@ public class PushService {
      * @param message
      * @return
      */
-    public Future<Void> pushMessageFuture(Long userId, JSONObject message) {
+    public Future<Void> pushMessageFuture(Long userId, Object message) {
         Object serviceName = this.stringRedisTemplate.opsForHash().get(SOCKET_USER_SPRING_APPLICATION_NAME, userId + "");
         if (serviceName != null) {
             return this.pushFeign.pushMessageFuture(serviceName.toString(), userId, message);

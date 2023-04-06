@@ -1,6 +1,5 @@
 package com.lp.feign;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.lp.config.DynamicRoutingConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +22,7 @@ public interface PushFeign {
      * @param message     消息体
      */
     @PostMapping(value = "//{serviceName}/push/{userId}")
-    void pushMessage(@PathVariable String serviceName, @PathVariable Long userId, @RequestBody JSONObject message);
+    void pushMessage(@PathVariable String serviceName, @PathVariable Long userId, @RequestBody Object message);
 
     /**
      * 群发
@@ -32,7 +31,7 @@ public interface PushFeign {
      * @param message
      */
     @PostMapping(value = "//{serviceName}")
-    void pushMessage(@PathVariable String serviceName, @RequestBody JSONObject message);
+    void pushMessage(@PathVariable String serviceName, @RequestBody Object message);
 
     /**
      * 有返回发送
@@ -43,5 +42,5 @@ public interface PushFeign {
      * @return
      */
     @PostMapping("//{serviceName}/future/{userId}")
-    Future<Void> pushMessageFuture(@PathVariable String serviceName, @PathVariable Long userId, @RequestBody JSONObject message);
+    Future<Void> pushMessageFuture(@PathVariable String serviceName, @PathVariable Long userId, @RequestBody Object message);
 }

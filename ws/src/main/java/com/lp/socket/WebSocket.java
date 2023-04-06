@@ -1,7 +1,8 @@
 package com.lp.socket;
 
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -34,8 +35,8 @@ public class WebSocket {
      */
     private Session session;
     private Long userId;
-    private String applicationName = System.getProperty("SpringApplicationName");
-    private StringRedisTemplate stringRedisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
+    private final String applicationName = System.getProperty("SpringApplicationName");
+    private final StringRedisTemplate stringRedisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
 
     /**
      * 实现服务器主动推送
@@ -44,11 +45,15 @@ public class WebSocket {
      * @param message
      * @return
      */
-    public static void sendMessage(Long userId, JSONObject message) {
+    public static void sendMessage(Long userId, Object message) {
         WebSocket webSocket = WEB_SOCKET_MAP.get(userId);
         if (webSocket != null) {
             synchronized (webSocket.session) {
-                webSocket.session.getAsyncRemote().sendText(JSONObject.toJSONString(message));
+                try {
+                    webSocket.session.getAsyncRemote().sendText(new ObjectMapper().writeValueAsString(message));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("数据转换异常",e);
+                }
             }
         }
     }
@@ -60,11 +65,15 @@ public class WebSocket {
      * @param message
      * @return
      */
-    public static Future<Void> sendMessageFuture(Long userId, JSONObject message) {
+    public static Future<Void> sendMessageFuture(Long userId, Object message) {
         WebSocket webSocket = WEB_SOCKET_MAP.get(userId);
         if (webSocket != null) {
             synchronized (webSocket.session) {
-                return webSocket.session.getAsyncRemote().sendText(JSONObject.toJSONString(message));
+                try {
+                    return webSocket.session.getAsyncRemote().sendText(new ObjectMapper().writeValueAsString(message));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("数据转换异常",e);
+                }
             }
         }
         return null;
@@ -75,10 +84,14 @@ public class WebSocket {
      *
      * @param message
      */
-    public static void sendMessage(JSONObject message) {
+    public static void sendMessage(Object message) {
         WEB_SOCKET_MAP.forEach((k, v) -> {
             synchronized (v.session) {
-                v.session.getAsyncRemote().sendText(JSONObject.toJSONString(message));
+                try {
+                    v.session.getAsyncRemote().sendText(new ObjectMapper().writeValueAsString(message));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("数据转换异常",e);
+                }
             }
         });
     }
@@ -108,8 +121,8 @@ public class WebSocket {
     @OnClose
     public void onClose(Session session) throws IOException {
         System.out.println("one connection closed");
-        this.stringRedisTemplate.opsForHash().delete(SOCKET_USER_SPRING_APPLICATION_NAME, userId + "");
-        WEB_SOCKET_MAP.remove(this);
+        this.stringRedisTemplate.opsForHash().delete(SOCKET_USER_SPRING_APPLICATION_NAME, String.valueOf(userId));
+        WEB_SOCKET_MAP.remove(this.userId);
         //处理自己的业务逻辑
         session.close();
     }
@@ -122,13 +135,13 @@ public class WebSocket {
      */
     @OnError
     public void onError(Session session, Throwable throwable) throws IOException {
-        this.stringRedisTemplate.opsForHash().delete(SOCKET_USER_SPRING_APPLICATION_NAME, userId + "");
+        this.stringRedisTemplate.opsForHash().delete(SOCKET_USER_SPRING_APPLICATION_NAME, String.valueOf(userId));
         throwable.printStackTrace();
-        if (Objects.nonNull(this.session) && Objects.nonNull(throwable) && !(throwable instanceof EOFException)) {
+        if (Objects.nonNull(this.session) && !(throwable instanceof EOFException)) {
             System.err.println("UserId = " + userId + ", 通道ID=" + this.session.getId() + ", 出错信息=" + throwable);
         }
         if (Objects.nonNull(session) && session.isOpen()) {
-            WEB_SOCKET_MAP.remove(this);
+            WEB_SOCKET_MAP.remove(this.userId);
             session.close();
         }
     }
