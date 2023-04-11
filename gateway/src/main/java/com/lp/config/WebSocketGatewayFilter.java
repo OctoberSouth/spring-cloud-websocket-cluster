@@ -14,7 +14,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR;
 
@@ -55,7 +54,7 @@ public class WebSocketGatewayFilter implements GatewayFilter {
         } catch (NacosException e) {
             throw new RuntimeException(e);
         }
-        List<String> list = servicesOfServer.stream().filter(e -> e.startsWith("WS-")).collect(Collectors.toList());
+        List<String> list = servicesOfServer.stream().filter(e -> e.startsWith("WS-")).toList();
         Random random = new Random();
         int n = random.nextInt(list.size());
         return "lb://" + list.get(n);
