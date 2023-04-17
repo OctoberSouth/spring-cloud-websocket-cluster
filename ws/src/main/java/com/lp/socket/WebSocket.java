@@ -30,13 +30,13 @@ public class WebSocket {
      * 静态常量
      */
     private static final String SOCKET_USER_SPRING_APPLICATION_NAME = "ws:socket:user:spring:application:name";
+    private final String applicationName = System.getProperty("SpringApplicationName");
+    private final StringRedisTemplate stringRedisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
     /**
      * session
      */
     private Session session;
     private Long userId;
-    private final String applicationName = System.getProperty("SpringApplicationName");
-    private final StringRedisTemplate stringRedisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
 
     /**
      * 实现服务器主动推送
@@ -52,7 +52,7 @@ public class WebSocket {
                 try {
                     webSocket.session.getAsyncRemote().sendText(new ObjectMapper().writeValueAsString(message));
                 } catch (JsonProcessingException e) {
-                    throw new RuntimeException("数据转换异常",e);
+                    throw new RuntimeException("数据转换异常", e);
                 }
             }
         }
@@ -72,7 +72,7 @@ public class WebSocket {
                 try {
                     return webSocket.session.getAsyncRemote().sendText(new ObjectMapper().writeValueAsString(message));
                 } catch (JsonProcessingException e) {
-                    throw new RuntimeException("数据转换异常",e);
+                    throw new RuntimeException("数据转换异常", e);
                 }
             }
         }
@@ -90,7 +90,7 @@ public class WebSocket {
                 try {
                     v.session.getAsyncRemote().sendText(new ObjectMapper().writeValueAsString(message));
                 } catch (JsonProcessingException e) {
-                    throw new RuntimeException("数据转换异常",e);
+                    throw new RuntimeException("数据转换异常", e);
                 }
             }
         });
