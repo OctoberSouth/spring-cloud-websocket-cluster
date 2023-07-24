@@ -1,25 +1,23 @@
 package com.lp.config;
 
-import jakarta.annotation.Resource;
-import org.springframework.cloud.gateway.route.RouteLocator;
-import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
+import com.alibaba.nacos.api.exception.NacosException;
+import com.alibaba.nacos.api.naming.NamingFactory;
+import com.alibaba.nacos.api.naming.NamingService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
-
 /**
- * 跨域配置
- *
- * @author 10263
+ * @author 刘攀
  */
-@Configuration
+@Component
 public class GatewayConfig {
 
-    @Resource
-    private WebSocketGatewayFilter webSocketGatewayFilter;
+    @Value("${spring.cloud.nacos.server-addr}")
+    private String serverAddr;
 
     @Bean
     public CorsWebFilter corsWebFilter() {
@@ -35,15 +33,11 @@ public class GatewayConfig {
     }
 
     @Bean
-    public RouteLocator redirectRouteLocator(RouteLocatorBuilder builder) {
-        return builder.routes()
-                .route(r -> r.path("/websocket/ws/**")
-                        .filters(f -> f.stripPrefix(1).filter(webSocketGatewayFilter))
-                        .uri("lb://ws"))
-                .route(r -> r.path("/api/web/**")
-                        .filters(f -> f.rewritePath("/api/web/?(?<segment>.*)", "/$\\{segment}"))
-                        .uri("lb://web"))
-                .build();
-
+    public NamingService namingService() {
+        try {
+            return NamingFactory.createNamingService(serverAddr);
+        } catch (NacosException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

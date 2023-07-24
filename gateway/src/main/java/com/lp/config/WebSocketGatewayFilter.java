@@ -1,10 +1,9 @@
 package com.lp.config;
 
 import com.alibaba.nacos.api.exception.NacosException;
-import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.route.Route;
@@ -26,8 +25,8 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
 @Component
 public class WebSocketGatewayFilter implements GatewayFilter {
 
-    @Value("${spring.cloud.nacos.server-addr}")
-    private String serverAddr;
+    @Resource
+    private NamingService namingService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -46,18 +45,15 @@ public class WebSocketGatewayFilter implements GatewayFilter {
      * @return
      */
     private String getName() {
-        NamingService naming;
-        List<String> servicesOfServer;
         try {
-            naming = NamingFactory.createNamingService(serverAddr);
-            servicesOfServer = naming.getServicesOfServer(1, Integer.MAX_VALUE).getData();
+            List<String> servicesOfServer = namingService.getServicesOfServer(1, Integer.MAX_VALUE).getData();
+            List<String> list = servicesOfServer.stream().filter(e -> e.startsWith("WS-")).toList();
+            Random random = new Random();
+            int n = random.nextInt(list.size());
+            return "lb://" + list.get(n);
         } catch (NacosException e) {
             throw new RuntimeException(e);
         }
-        List<String> list = servicesOfServer.stream().filter(e -> e.startsWith("WS-")).toList();
-        Random random = new Random();
-        int n = random.nextInt(list.size());
-        return "lb://" + list.get(n);
     }
 
 }
