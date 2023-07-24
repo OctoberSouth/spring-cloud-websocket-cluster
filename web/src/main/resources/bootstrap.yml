@@ -1,11 +1,12 @@
 spring:
   application:
     name: web
-  redis:
-    host: 127.0.0.1
+  data:
+    redis:
+      host: 192.168.137.174
   cloud:
     nacos:
-      server-addr: 127.0.0.1
+      server-addr: 192.168.137.174
       config:
         file-extension: yaml
 server:

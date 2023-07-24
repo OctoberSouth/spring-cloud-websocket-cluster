@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.5</version>
+        <version>3.1.2</version>
     </parent>
 
     <properties>
@@ -27,7 +27,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>17</java.version>
         <skipTests>true</skipTests>
-        <spring-cloud.version>2022.0.2</spring-cloud.version>
+        <spring-cloud.version>2022.0.3</spring-cloud.version>
         <spring-cloud-alibaba.version>2022.0.0.0-RC2</spring-cloud-alibaba.version>
     </properties>
 
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.8.15</version>
+            <version>5.8.20</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

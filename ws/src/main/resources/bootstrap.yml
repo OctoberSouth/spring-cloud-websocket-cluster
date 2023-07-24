@@ -3,11 +3,12 @@ spring:
     #随机名字，做ws集群使用
     name: ${SpringApplicationName}
   #    name: ws
-  redis:
-    host: 127.0.0.1
+  data:
+    redis:
+      host: 192.168.137.174
   cloud:
     nacos:
-      server-addr: 127.0.0.1
+      server-addr: 192.168.137.174
       config:
         file-extension: yaml
 
