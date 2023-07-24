@@ -110,7 +110,7 @@ public class WebSocket {
         //根据token获取用户信息
         this.userId = userId;
         WEB_SOCKET_MAP.put(this.userId, this);
-        this.stringRedisTemplate.opsForHash().put(SOCKET_USER_SPRING_APPLICATION_NAME, userId + "", applicationName);
+        this.stringRedisTemplate.opsForHash().put(SOCKET_USER_SPRING_APPLICATION_NAME, String.valueOf(userId), applicationName);
     }
 
     /**
