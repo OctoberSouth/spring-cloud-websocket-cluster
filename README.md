@@ -1,7 +1,8 @@
 # spring-cloud-websocket-cluster
 
 ## https://gitee.com/liupan1230/websocket-cluster-netty  
-推荐 netty版本，性能更好，封装更完善，采用protobuf 通信，更可以拿来即用！！！！ 
+本项目暂停更新，推荐 netty版本，性能更好，封装更完善，采用protobuf 通信，更可以拿来即用！！！！ 
+https://gitee.com/liupan1230/websocket-cluster-netty  
 
 #### 介绍
 
