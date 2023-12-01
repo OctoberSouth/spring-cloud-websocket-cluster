@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: gateway-server
+  cloud:
+    nacos:
+      server-addr: 192.168.137.223
+      config:
+        file-extension: yaml
+  threads:
+    virtual:
+      enabled: true

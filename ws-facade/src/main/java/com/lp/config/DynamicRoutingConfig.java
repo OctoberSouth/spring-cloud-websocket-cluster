@@ -4,7 +4,7 @@ import feign.RequestInterceptor;
 import org.springframework.context.annotation.Bean;
 
 /**
- * @author 10263
+ * @author lp
  */
 public class DynamicRoutingConfig {
     @Bean

@@ -1,0 +1,23 @@
+spring:
+  application:
+    #随机名字，做ws集群使用
+    name: ${SpringApplicationName}
+  #    name: ws
+  cloud:
+    nacos:
+      server-addr: 192.168.137.223
+      config:
+        file-extension: yaml
+  data:
+    redis:
+      host: 192.168.137.223
+      password: 123456
+  threads:
+    virtual:
+      enabled: true
+server:
+  port: 8088
+
+ws:
+  path: /ws/{language}/{userId}
+  port: 9090
