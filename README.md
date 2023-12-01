@@ -26,7 +26,7 @@ https://gitee.com/liupan1230/websocket-cluster-netty
 4. gateway-server 为网关服务，重点为WebSocketGatewayFilter类，此可以保证了网关动态连接到ws服务，建议鉴权可以在此处完成，保证连接到websocket的都是有效连接
 5. ws-facade 需要通过其他服务直接给用户发送消息直接集成这个即可
 6. ws-transit 中转集成，需要接收websocket服务的消息，直接集成这个服务，然后利用EntranceService自己的业务即可
-7. ws-server websocket服务，与用户建立联系，接收发送消息，重点可看WebSocket类，onBinary 同步异步发送消息，给有状态，无状态服务发送消息都在这里
+7. ws-server websocket服务，与用户建立联系，接收发送消息，重点可看WebSocket类，onMessage 同步异步发送消息，给有状态，无状态服务发送消息都在这里
 8. open-server 是一个对外开放的服务，可以让其他不是该微服务架构体系下的也能给用户发送消息
 9. activity-server 服务是一个示例服，该服务可以接收websocket的消息，完成自己的业务处理，然后将消息返回给用户
 
