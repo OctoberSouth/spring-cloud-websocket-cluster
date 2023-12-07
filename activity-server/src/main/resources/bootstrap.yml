@@ -3,15 +3,14 @@ spring:
     name: activity-server
   cloud:
     nacos:
-      server-addr: 127.0.0.1
+      server-addr: 192.168.137.47
       config:
         file-extension: yaml
   data:
     redis:
-      host: 127.0.0.1
-      password: 123456
+      host: 192.168.137.47
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/test
+    url: jdbc:mysql://192.168.137.47:3306/test
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver

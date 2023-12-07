@@ -5,13 +5,12 @@ spring:
   #    name: ws
   cloud:
     nacos:
-      server-addr: 192.168.137.223
+      server-addr: 192.168.137.47
       config:
         file-extension: yaml
   data:
     redis:
-      host: 192.168.137.223
-      password: 123456
+      host: 192.168.137.47
   threads:
     virtual:
       enabled: true
