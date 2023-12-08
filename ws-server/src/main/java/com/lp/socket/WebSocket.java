@@ -1,11 +1,13 @@
 package com.lp.socket;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import com.lp.constants.MqTopicConstants;
 import com.lp.constants.RedisKeyConstants;
 import com.lp.dto.Message;
 import com.lp.dto.UserServerDTO;
+import com.lp.enums.DeviceEnum;
 import com.lp.enums.ServerEnum;
 import com.lp.feign.EntranceFeign;
 import com.lp.util.LocalCache;
@@ -21,13 +23,14 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
 /**
  * @author lp
  */
-@ServerEndpoint("/ws/{language}/{userId}")
+@ServerEndpoint("/ws/{language}/{userId}/{device}")
 @Slf4j
 @Component
 public class WebSocket {
@@ -52,25 +55,58 @@ public class WebSocket {
      */
     @Getter
     private String language;
+    /**
+     * 设备
+     */
+    @Getter
+    private String device;
+
+    /**
+     * 连接生成唯一ID
+     */
+    @Getter
+    private String uuid;
 
     /**
      * 当有新的WebSocket连接完成时
+     *
+     * @param session
+     * @param language 语言
+     * @param userId   用户ID
+     * @param device   设备类型
      */
     @OnOpen
-    public void onOpen(Session session, @PathParam("language") String language, @PathParam("userId") Long userId) throws IOException {
-        WebSocket socket = WebSocketUtil.get(userId);
-        if (Objects.nonNull(socket)) {
+    public void onOpen(Session session, @PathParam("language") String language, @PathParam("userId") Long userId, @PathParam("device") String device) {
+        if (Objects.isNull(DeviceEnum.getEnum(device))) {
+            //设备不匹配直接拒绝连接
+            try {
+                session.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        Map<DeviceEnum, WebSocket> webSocketMap = WebSocketUtil.get(userId);
+        if (Objects.nonNull(webSocketMap)) {
             //关闭重复连接
-            socket.getSession().close();
+            try {
+                WebSocket webSocket = webSocketMap.get(DeviceEnum.getEnum(device));
+                if (Objects.nonNull(webSocket)) {
+                    webSocket.getSession().close();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         this.session = session;
         //根据token获取用户信息
         this.userId = userId;
+        this.device = device;
         this.language = language;
-        WebSocketUtil.putMap(this.userId, this);
+        this.uuid = IdUtil.simpleUUID();
+        WebSocketUtil.putMap(this.userId, this, DeviceEnum.getEnum(device));
         this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, userId + "", applicationName);
         //通知上线
-        UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", applicationName);
+        UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", applicationName, device);
         this.stringRedisTemplate.convertAndSend(MqTopicConstants.SOCKET_USER_SPRING_APPLICATION, JSONUtil.toJsonStr(userDTO));
     }
 
@@ -78,7 +114,7 @@ public class WebSocket {
      * 当有WebSocket连接关闭时
      */
     @OnClose
-    public void onClose(Session session) throws IOException {
+    public void onClose(Session session) {
         close(session);
     }
 
@@ -86,7 +122,7 @@ public class WebSocket {
      * 当有WebSocket抛出异常时
      */
     @OnError
-    public void onError(Session session, Throwable throwable) throws IOException {
+    public void onError(Session session, Throwable throwable) {
         //删除缓存信息
         close(session);
     }
@@ -96,19 +132,24 @@ public class WebSocket {
      *
      * @param session
      */
-    private void close(Session session) throws IOException {
-        WebSocket webSocket = WebSocketUtil.get(this.userId);
-        if (Objects.equals(webSocket.getSession(), session)) {
+    private void close(Session session) {
+        Map<DeviceEnum, WebSocket> webSocketMap = WebSocketUtil.get(this.userId);
+        if (Objects.equals(webSocketMap.get(DeviceEnum.getEnum(this.device)).getSession(), session)) {
             //删除缓存信息
             this.stringRedisTemplate.opsForHash().delete(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, userId + "");
-            WebSocketUtil.removeMap(this.userId);
+            WebSocketUtil.removeMap(this.userId, this.device, this.uuid);
             //通知下线
             UserServerDTO userDTO = new UserServerDTO();
             userDTO.setUid(userId);
             userDTO.setServer("ws-server");
+            userDTO.setDevice(this.device);
             this.stringRedisTemplate.convertAndSend(MqTopicConstants.SOCKET_USER_SPRING_APPLICATION, JSONUtil.toJsonStr(userDTO));
         }
-        session.close();
+        try {
+            session.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

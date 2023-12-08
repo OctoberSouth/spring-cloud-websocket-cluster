@@ -3,8 +3,11 @@ package com.lp.util;
 import cn.hutool.json.JSONUtil;
 import com.lp.dto.Message;
 import com.lp.dto.MessageDTO;
+import com.lp.enums.DeviceEnum;
 import com.lp.socket.WebSocket;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -17,7 +20,7 @@ public class WebSocketUtil {
     /**
      * 存放用户信息
      */
-    private static final ConcurrentHashMap<Long, WebSocket> WEB_SOCKET_MAP = new ConcurrentHashMap<>(16);
+    private static final ConcurrentHashMap<Long, ConcurrentHashMap<DeviceEnum, WebSocket>> WEB_SOCKET_MAP = new ConcurrentHashMap<>(16);
 
 
     /**
@@ -26,8 +29,13 @@ public class WebSocketUtil {
      * @param userId
      * @param webSocket
      */
-    public static void putMap(Long userId, WebSocket webSocket) {
-        WEB_SOCKET_MAP.put(userId, webSocket);
+    public static void putMap(Long userId, WebSocket webSocket, DeviceEnum deviceEnum) {
+        ConcurrentHashMap<DeviceEnum, WebSocket> webSocketMap = get(userId);
+        if (Objects.isNull(webSocketMap)) {
+            webSocketMap = new ConcurrentHashMap<>(16);
+        }
+        webSocketMap.put(deviceEnum, webSocket);
+        WEB_SOCKET_MAP.put(userId, webSocketMap);
     }
 
     /**
@@ -35,8 +43,15 @@ public class WebSocketUtil {
      *
      * @param userId
      */
-    public static void removeMap(Long userId) {
-        WEB_SOCKET_MAP.remove(userId);
+    public static void removeMap(Long userId, String device, String uuid) {
+        DeviceEnum deviceEnum = DeviceEnum.getEnum(device);
+        ConcurrentHashMap<DeviceEnum, WebSocket> webSocketMap = get(userId);
+        if (Objects.nonNull(webSocketMap)) {
+            WebSocket webSocket = webSocketMap.get(deviceEnum);
+            if (Objects.nonNull(webSocket) && Objects.equals(webSocket.getUuid(), uuid)) {
+                webSocketMap.remove(deviceEnum);
+            }
+        }
     }
 
 
@@ -47,9 +62,9 @@ public class WebSocketUtil {
      */
     public static void sendMessage(MessageDTO dto) {
         dto.getUserId().forEach(e -> {
-            WebSocket webSocket = WEB_SOCKET_MAP.get(e);
-            if (webSocket != null) {
-                sendMessage(webSocket, dto.getData());
+            Map<DeviceEnum, WebSocket> webSocketMap = get(e);
+            if (Objects.nonNull(webSocketMap)) {
+                webSocketMap.forEach((k, v) -> sendMessage(v, dto.getData()));
             }
         });
     }
@@ -62,9 +77,9 @@ public class WebSocketUtil {
      * @return
      */
     public static void sendMessage(Long userId, Message vo) {
-        WebSocket webSocket = WEB_SOCKET_MAP.get(userId);
-        if (webSocket != null) {
-            sendMessage(webSocket, vo);
+        Map<DeviceEnum, WebSocket> webSocketMap = get(userId);
+        if (Objects.nonNull(webSocketMap)) {
+            webSocketMap.forEach((k, v) -> sendMessage(v, vo));
         }
     }
 
@@ -74,7 +89,7 @@ public class WebSocketUtil {
      * @param userId
      * @return
      */
-    public static WebSocket get(Long userId) {
+    public static ConcurrentHashMap<DeviceEnum, WebSocket> get(Long userId) {
         return WEB_SOCKET_MAP.get(userId);
     }
 
@@ -84,7 +99,9 @@ public class WebSocketUtil {
      * @param vo
      */
     public static void sendMessage(Message vo) {
-        WEB_SOCKET_MAP.forEach((k, v) -> sendMessage(v, vo));
+        WEB_SOCKET_MAP.forEach((k, v) -> v.forEach((k1, v2) -> {
+            sendMessage(v2, vo);
+        }));
     }
 
     /**

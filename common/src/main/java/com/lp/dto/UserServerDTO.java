@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 
 /**
  * 用户对象
+ *
+ * @author 10263
  */
 @Data
 @AllArgsConstructor
@@ -26,5 +28,10 @@ public class UserServerDTO {
      * 用户指定连接服务名
      */
     private String serverName;
+
+    /**
+     * 设备类型
+     */
+    private String device;
 
 }

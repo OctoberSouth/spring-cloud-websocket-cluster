@@ -5,6 +5,9 @@ package com.lp.dto;
 
 import lombok.Data;
 
+/**
+ * @author 10263
+ */
 @Data
 public class Message {
     //消息类型
