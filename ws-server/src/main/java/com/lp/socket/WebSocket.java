@@ -11,13 +11,13 @@ import com.lp.feign.EntranceFeign;
 import com.lp.util.LocalCache;
 import com.lp.util.WebSocketUtil;
 import jakarta.websocket.*;
+import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.Random;
 /**
  * @author lp
  */
-@ServerEndpoint("${ws.path}")
+@ServerEndpoint("/ws/{language}/{userId}")
 @Slf4j
 @Component
 public class WebSocket {
@@ -57,7 +57,7 @@ public class WebSocket {
      * 当有新的WebSocket连接完成时
      */
     @OnOpen
-    public void onOpen(Session session, @PathVariable String language, @PathVariable Long userId) throws IOException {
+    public void onOpen(Session session, @PathParam("language") String language, @PathParam("userId") Long userId) throws IOException {
         WebSocket socket = WebSocketUtil.get(userId);
         if (Objects.nonNull(socket)) {
             //关闭重复连接

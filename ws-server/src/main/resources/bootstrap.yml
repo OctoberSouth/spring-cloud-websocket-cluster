@@ -16,7 +16,3 @@ spring:
       enabled: true
 server:
   port: 8088
-
-ws:
-  path: /ws/{language}/{userId}
-  port: 9090

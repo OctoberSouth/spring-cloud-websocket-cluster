@@ -21,7 +21,7 @@ public class GatewayFilter {
     @Bean
     public RouteLocator redirectRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route(r -> r.path("/websocket/ws/**")
+                .route(r -> r.path("/websocket/**")
                         .filters(f -> f.stripPrefix(1).filter(webSocketGatewayFilter))
                         .uri("lb://ws"))
                 .route(r -> r.path("/api/web/**")

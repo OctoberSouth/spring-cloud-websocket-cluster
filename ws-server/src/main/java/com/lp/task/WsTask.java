@@ -20,7 +20,7 @@ public class WsTask {
      * socket心跳
      * 每5秒执行一次
      */
-    @Scheduled(cron = "0/5 * *  * * ? ")
+    @Scheduled(fixedDelay = 5000)
     public void heartbeatTask() {
         WebSocketEnum heartbeat = WebSocketEnum.HEARTBEAT;
         Message demo = new Message();
