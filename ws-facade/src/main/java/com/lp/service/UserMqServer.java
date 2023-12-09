@@ -24,7 +24,7 @@ public class UserMqServer {
      */
     public void relieve(Long uid, String server) {
         UserServerDTO dto = new UserServerDTO();
-        dto.setUid(uid);
+        dto.setUserId(uid);
         dto.setServer(server);
         this.stringRedisTemplate.convertAndSend(MqTopicConstants.USER_SERVER_NAME, JSONUtil.toJsonStr(dto));
     }
@@ -38,7 +38,7 @@ public class UserMqServer {
      */
     public void build(Long uid, String server, String serverName) {
         UserServerDTO dto = new UserServerDTO();
-        dto.setUid(uid);
+        dto.setUserId(uid);
         dto.setServer(server);
         dto.setServerName(serverName);
         this.stringRedisTemplate.convertAndSend(MqTopicConstants.USER_SERVER_NAME, JSONUtil.toJsonStr(dto));

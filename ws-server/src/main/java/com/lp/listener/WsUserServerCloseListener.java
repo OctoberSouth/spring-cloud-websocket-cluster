@@ -25,7 +25,7 @@ public class WsUserServerCloseListener implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         UserServerDTO wsUser = JSONUtil.toBean(message.toString(), UserServerDTO.class);
-        Map<DeviceEnum, WebSocket> webSocketMap = WebSocketUtil.get(wsUser.getUid());
+        Map<DeviceEnum, WebSocket> webSocketMap = WebSocketUtil.get(wsUser.getUserId());
         //不是同个客户端，挤下线
         if (Objects.nonNull(webSocketMap) && StrUtil.isNotBlank(wsUser.getServerName()) && !Objects.equals(wsUser.getServerName(), System.getProperty("SpringApplicationName"))) {
             try {

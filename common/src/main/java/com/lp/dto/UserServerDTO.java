@@ -17,7 +17,7 @@ public class UserServerDTO {
     /**
      * 用户ID
      */
-    private Long uid;
+    private Long userId;
 
     /**
      * 服务
@@ -33,5 +33,15 @@ public class UserServerDTO {
      * 设备类型
      */
     private String device;
+
+    /**
+     * 连接唯一ID
+     */
+    private String uuid;
+
+    /**
+     * 是否上线
+     */
+    private Boolean login;
 
 }

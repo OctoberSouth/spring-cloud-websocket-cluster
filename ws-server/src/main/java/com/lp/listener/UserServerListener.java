@@ -18,9 +18,9 @@ public class UserServerListener implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         UserServerDTO wsUser = JSONUtil.toBean(message.toString(), UserServerDTO.class);
         if (StrUtil.isBlank(wsUser.getServerName())) {
-            LocalCache.userServer.remove(wsUser.getUid() + wsUser.getServer());
+            LocalCache.userServer.remove(wsUser.getUserId() + wsUser.getServer());
         } else {
-            LocalCache.userServer.put(wsUser.getUid() + wsUser.getServer(), wsUser.getServerName());
+            LocalCache.userServer.put(wsUser.getUserId() + wsUser.getServer(), wsUser.getServerName());
         }
     }
 

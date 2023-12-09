@@ -4,6 +4,7 @@ package com.lp.service;
 import cn.hutool.core.util.StrUtil;
 import com.lp.constants.RedisKeyConstants;
 import com.lp.dto.Message;
+import com.lp.enums.DeviceEnum;
 import com.lp.feign.PushFeign;
 import com.lp.util.LocalCache;
 import jakarta.annotation.Resource;
@@ -11,6 +12,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,35 +43,41 @@ public class PushService {
      */
     public void pushMessage(Message vo, Long... userId) {
         for (Long id : userId) {
-            String serviceName = getServiceName(id);
-            if (StrUtil.isNotBlank(serviceName)) {
-                this.pushFeign.pushMessage(serviceName, id, vo);
-            }
+            List<String> serviceNameList = getServiceName(id);
+            serviceNameList.forEach(serviceName -> {
+                this.pushFeign.pushMessage(serviceName.split(":")[0], id, vo);
+            });
         }
     }
 
 
     /**
-     * 根据用户ID获取服务名
+     * 根据用户ID获取所有服务名
      *
      * @param id
      * @return
      */
-    private String getServiceName(Long id) {
-        String serviceName = LocalCache.wsUser.get(id);
-        if (StrUtil.isBlank(serviceName)) {
-            long millis = System.currentTimeMillis();
-            if (millis - cacheTime > 1000 * 60 * 5) {
-                synchronized (this) {
-                    Map<Object, Object> userMap = this.stringRedisTemplate.opsForHash().entries(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME);
-                    //将获取到的数据放到缓存里面
-                    LocalCache.wsUser.putAll(userMap.entrySet().stream().collect(Collectors.toMap(key -> Long.valueOf(key.getKey().toString()), value -> value.getValue().toString())));
-                    serviceName = LocalCache.wsUser.get(id);
-                    cacheTime = millis;
+    private List<String> getServiceName(Long id) {
+        List<String> serviceNameList = new ArrayList<>();
+        for (DeviceEnum request : DeviceEnum.values()) {
+            String serviceName = LocalCache.wsUser.get(id + ":" + request.getDeviceType());
+            if (StrUtil.isBlank(serviceName)) {
+                long millis = System.currentTimeMillis();
+                if (millis - cacheTime > 1000 * 60 * 5) {
+                    synchronized (this) {
+                        Map<Object, Object> userMap = this.stringRedisTemplate.opsForHash().entries(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME);
+                        //将获取到的数据放到缓存里面
+                        LocalCache.wsUser.putAll(userMap.entrySet().stream().collect(Collectors.toMap(key -> key.getKey().toString(), value -> value.getValue().toString())));
+                        cacheTime = millis;
+                    }
                 }
+                serviceName = LocalCache.wsUser.get(id + ":" + request.getDeviceType());
+            }
+            if (StrUtil.isBlank(serviceName)) {
+                serviceNameList.add(serviceName);
             }
         }
-        return serviceName;
+        return serviceNameList;
     }
 
     /**
@@ -80,10 +88,8 @@ public class PushService {
      */
     public void pushMessage(Message vo, Set<Long> userId) {
         for (Long id : userId) {
-            String serviceName = getServiceName(id);
-            if (StrUtil.isNotBlank(serviceName)) {
-                this.pushFeign.pushMessage(serviceName, id, vo);
-            }
+            List<String> serviceNameList = getServiceName(id);
+            serviceNameList.forEach(serviceName -> this.pushFeign.pushMessage(serviceName.split(":")[0], id, vo));
         }
     }
 
@@ -106,9 +112,7 @@ public class PushService {
      * @return
      */
     public void pushMessageFuture(Message vo, Long userId) {
-        String serviceName = getServiceName(userId);
-        if (StrUtil.isNotBlank(serviceName)) {
-            this.pushFeign.pushMessage(serviceName, userId, vo);
-        }
+        List<String> serviceNameList = getServiceName(userId);
+        serviceNameList.forEach(serviceName -> this.pushFeign.pushMessage(serviceName.split(":")[0], userId, vo));
     }
 }

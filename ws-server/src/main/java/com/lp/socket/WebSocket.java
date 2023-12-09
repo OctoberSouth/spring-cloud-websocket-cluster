@@ -104,9 +104,9 @@ public class WebSocket {
         this.language = language;
         this.uuid = IdUtil.simpleUUID();
         WebSocketUtil.putMap(this.userId, this, DeviceEnum.getEnum(device));
-        this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, userId + "", applicationName);
+        this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, this.userId + ":" + this.device, this.applicationName + ":" + this.uuid);
         //通知上线
-        UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", applicationName, device);
+        UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", this.applicationName, this.device, this.uuid, true);
         this.stringRedisTemplate.convertAndSend(MqTopicConstants.SOCKET_USER_SPRING_APPLICATION, JSONUtil.toJsonStr(userDTO));
     }
 
@@ -125,6 +125,7 @@ public class WebSocket {
     public void onError(Session session, Throwable throwable) {
         //删除缓存信息
         close(session);
+        log.error("WebSocket异常关闭：{},用户：{}，设备：{}", throwable, userId, device);
     }
 
     /**
@@ -136,13 +137,13 @@ public class WebSocket {
         Map<DeviceEnum, WebSocket> webSocketMap = WebSocketUtil.get(this.userId);
         if (Objects.equals(webSocketMap.get(DeviceEnum.getEnum(this.device)).getSession(), session)) {
             //删除缓存信息
-            this.stringRedisTemplate.opsForHash().delete(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, userId + "");
+            Object value = this.stringRedisTemplate.opsForHash().get(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, this.userId + ":" + this.device);
+            if (Objects.nonNull(value) && Objects.equals(value.toString(), this.applicationName + ":" + this.uuid)) {
+                this.stringRedisTemplate.opsForHash().delete(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, this.userId + ":" + this.device);
+            }
             WebSocketUtil.removeMap(this.userId, this.device, this.uuid);
             //通知下线
-            UserServerDTO userDTO = new UserServerDTO();
-            userDTO.setUid(userId);
-            userDTO.setServer("ws-server");
-            userDTO.setDevice(this.device);
+            UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", this.applicationName, this.device, this.uuid, false);
             this.stringRedisTemplate.convertAndSend(MqTopicConstants.SOCKET_USER_SPRING_APPLICATION, JSONUtil.toJsonStr(userDTO));
         }
         try {

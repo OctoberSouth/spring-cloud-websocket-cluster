@@ -46,7 +46,7 @@ public class WebSocketUtil {
     public static void removeMap(Long userId, String device, String uuid) {
         DeviceEnum deviceEnum = DeviceEnum.getEnum(device);
         ConcurrentHashMap<DeviceEnum, WebSocket> webSocketMap = get(userId);
-        if (Objects.nonNull(webSocketMap)) {
+        if (Objects.nonNull(webSocketMap) && Objects.nonNull(deviceEnum)) {
             WebSocket webSocket = webSocketMap.get(deviceEnum);
             if (Objects.nonNull(webSocket) && Objects.equals(webSocket.getUuid(), uuid)) {
                 webSocketMap.remove(deviceEnum);

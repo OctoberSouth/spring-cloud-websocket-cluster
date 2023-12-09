@@ -11,7 +11,7 @@ public class LocalCache {
     /**
      * ws用户缓存
      */
-    public static Map<Long, String> wsUser = new HashMap<>();
+    public static Map<String, String> wsUser = new HashMap<>();
 
 
     /**
