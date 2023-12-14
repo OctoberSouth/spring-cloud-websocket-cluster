@@ -73,7 +73,7 @@ public class PushService {
                 }
                 serviceName = LocalCache.wsUser.get(id + ":" + request.getDeviceType());
             }
-            if (StrUtil.isBlank(serviceName)) {
+            if (StrUtil.isNotBlank(serviceName)) {
                 serviceNameList.add(serviceName);
             }
         }
