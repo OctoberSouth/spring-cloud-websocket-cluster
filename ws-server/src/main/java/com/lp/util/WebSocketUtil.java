@@ -99,9 +99,7 @@ public class WebSocketUtil {
      * @param vo
      */
     public static void sendMessage(Message vo) {
-        WEB_SOCKET_MAP.forEach((k, v) -> v.forEach((k1, v2) -> {
-            sendMessage(v2, vo);
-        }));
+        WEB_SOCKET_MAP.forEach((k, v) -> v.forEach((k1, v2) -> sendMessage(v2, vo)));
     }
 
     /**

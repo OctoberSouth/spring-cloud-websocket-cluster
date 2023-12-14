@@ -5,6 +5,9 @@ import lombok.Data;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author 10263
+ */
 @Data
 public class LocalCache {
 
