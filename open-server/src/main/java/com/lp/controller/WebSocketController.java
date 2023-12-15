@@ -3,6 +3,8 @@ package com.lp.controller;
 import com.lp.dto.Message;
 import com.lp.dto.MessageDTO;
 import com.lp.service.PushService;
+import com.lp.vo.R;
+import com.lp.vo.ResponseVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +31,9 @@ public class WebSocketController {
      * @param dto
      */
     @PostMapping("push")
-    public void pushMessage(@RequestBody @Valid MessageDTO dto) {
+    public ResponseVO<Void> pushMessage(@RequestBody @Valid MessageDTO dto) {
         this.pushService.pushMessage(dto.getData(), dto.getUserId());
+        return R.success();
     }
 
     /**
@@ -41,8 +44,9 @@ public class WebSocketController {
      * @param dto
      */
     @PostMapping("push/all")
-    public void pushAllMessage(@RequestBody @Valid Message dto) {
+    public ResponseVO<Void> pushAllMessage(@RequestBody @Valid Message dto) {
         this.pushService.pushMessage(dto);
+        return R.success();
     }
 
     /**
@@ -54,8 +58,9 @@ public class WebSocketController {
      * @param userId
      */
     @PostMapping("push/{userId}")
-    public void pushMessage(@PathVariable Long userId, @RequestBody @Valid Message dto) {
+    public ResponseVO<Void> pushMessage(@PathVariable Long userId, @RequestBody @Valid Message dto) {
         this.pushService.pushMessage(dto, userId);
+        return R.success();
     }
 
 }

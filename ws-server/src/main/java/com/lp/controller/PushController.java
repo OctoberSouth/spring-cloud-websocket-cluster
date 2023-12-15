@@ -3,6 +3,8 @@ package com.lp.controller;
 import com.lp.dto.Message;
 import com.lp.dto.MessageDTO;
 import com.lp.util.WebSocketUtil;
+import com.lp.vo.R;
+import com.lp.vo.ResponseVO;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -16,8 +18,9 @@ public class PushController {
 
 
     @PostMapping("{userId}")
-    public void pushMessage(@PathVariable Long userId, @RequestBody Message vo) {
+    public ResponseVO<Void> pushMessage(@PathVariable Long userId, @RequestBody Message vo) {
         WebSocketUtil.sendMessage(userId, vo);
+        return R.success();
     }
 
     /**
@@ -26,8 +29,9 @@ public class PushController {
      * @param vo
      */
     @PostMapping()
-    public void pushMessage(@RequestBody Message vo) {
+    public ResponseVO<Void> pushMessage(@RequestBody Message vo) {
         WebSocketUtil.sendMessage(vo);
+        return R.success();
     }
 
 
@@ -37,7 +41,8 @@ public class PushController {
      * @param dto
      */
     @PostMapping("batch")
-    public void pushBatchMessage(@RequestBody MessageDTO dto) {
+    public ResponseVO<Void> pushBatchMessage(@RequestBody MessageDTO dto) {
         WebSocketUtil.sendMessage(dto);
+        return R.success();
     }
 }
