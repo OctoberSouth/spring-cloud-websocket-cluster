@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * 用户服务绑定通知
+ *
+ * @author Administrator
  */
 @Component
 public class UserServerListener implements MessageListener {

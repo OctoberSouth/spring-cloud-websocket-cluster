@@ -12,6 +12,9 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
+/**
+ * @author Administrator
+ */
 @Configuration
 public class RedisConfig {
 
