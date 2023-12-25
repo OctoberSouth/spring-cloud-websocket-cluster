@@ -194,15 +194,10 @@ public class WebSocket {
             }
         }
         //调用远程服务
-        if (message.getAsync()) {
-            //异步消息发送完就返回，不用等待处理结果
-            this.entranceFeign.asyncEntrance(serverName, applicationName, userId, language, message);
-        } else {
-            Message data = this.entranceFeign.entrance(serverName, userId, language, message);
-            if (Objects.nonNull(data)) {
-                //不为null的话，转换成字节数组 发送消息
-                session.getAsyncRemote().sendText(JSONUtil.toJsonStr(data));
-            }
+        Message data = this.entranceFeign.entrance(serverName, userId, language, message);
+        if (Objects.nonNull(data)) {
+            //不为null的话，转换成字节数组 发送消息
+            session.getAsyncRemote().sendText(JSONUtil.toJsonStr(data));
         }
     }
 

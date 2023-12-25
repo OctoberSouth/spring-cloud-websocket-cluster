@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.bt.game</groupId>
+        <groupId>com.lp</groupId>
         <artifactId>websocket-cluster</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
@@ -20,9 +20,24 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.bt.game</groupId>
-            <artifactId>ws-transit</artifactId>
+            <groupId>com.lp</groupId>
+            <artifactId>ws-facade</artifactId>
             <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--添加 Undertow 容器 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
         <!--redis-->
         <dependency>

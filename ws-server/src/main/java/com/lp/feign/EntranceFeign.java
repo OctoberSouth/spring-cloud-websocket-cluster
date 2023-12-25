@@ -26,17 +26,5 @@ public interface EntranceFeign {
      */
     @PostMapping(value = "//{serviceName}/entrance/{userId}")
     Message entrance(@PathVariable("serviceName") String serviceName, @PathVariable("userId") Long userId, @RequestHeader("Accept-Language") String language, @RequestBody @Valid Message dto);
-
-    /**
-     * 异步请求
-     *
-     * @param serviceName
-     * @param socketServerName
-     * @param userId
-     * @param language         语言
-     * @param dto
-     */
-    @PostMapping(value = "//{serviceName}/entrance/{socketServerName}/{userId}")
-    void asyncEntrance(@PathVariable("serviceName") String serviceName, @PathVariable("socketServerName") String socketServerName, @PathVariable("userId") Long userId, @RequestHeader("Accept-Language") String language, @RequestBody @Valid Message dto);
-
+    
 }

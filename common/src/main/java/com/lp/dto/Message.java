@@ -20,7 +20,5 @@ public class Message<T> {
     private String serverName;
     //具体数据信息
     private T data;
-    //是否异步请求
-    private Boolean async;
 
 }
