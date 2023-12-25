@@ -194,7 +194,7 @@ public class WebSocket {
             }
         }
         //调用远程服务
-        Message data = this.entranceFeign.entrance(serverName, userId, language, message);
+        Message data = this.entranceFeign.entrance(serverName, message.getPath(), userId, language, message);
         if (Objects.nonNull(data)) {
             //不为null的话，转换成字节数组 发送消息
             session.getAsyncRemote().sendText(JSONUtil.toJsonStr(data));

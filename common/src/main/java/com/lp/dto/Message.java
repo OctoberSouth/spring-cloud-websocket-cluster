@@ -14,6 +14,8 @@ import lombok.Data;
 public class Message<T> {
     //消息类型
     private Integer code;
+    //路径
+    private String path;
     //额外信息
     private String message;
     //服务名

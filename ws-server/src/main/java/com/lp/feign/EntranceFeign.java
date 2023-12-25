@@ -19,12 +19,13 @@ public interface EntranceFeign {
      * 消息通信
      *
      * @param serviceName 服务名
+     * @param path        请求路径
      * @param userId      用户
      * @param language    语言
      * @param dto         消息体
      * @return ResponseVO
      */
-    @PostMapping(value = "//{serviceName}/entrance/{userId}")
-    Message entrance(@PathVariable("serviceName") String serviceName, @PathVariable("userId") Long userId, @RequestHeader("Accept-Language") String language, @RequestBody @Valid Message dto);
-    
+    @PostMapping(value = "//{serviceName}/{path}/{userId}")
+    Message entrance(@PathVariable("serviceName") String serviceName, @PathVariable("path") String path, @PathVariable("userId") Long userId, @RequestHeader("Accept-Language") String language, @RequestBody @Valid Message dto);
+
 }
