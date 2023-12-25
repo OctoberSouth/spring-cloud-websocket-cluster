@@ -195,7 +195,7 @@ public class WebSocket {
             }
         }
         //调用远程服务
-        ResponseVO<?> vo = this.entranceFeign.entrance(serverName, message.getPath(), userId, language, JSONUtil.toJsonStr(message.getData()));
+        ResponseVO<?> vo = this.entranceFeign.entrance(serverName, message.getPath(), userId, language, JSONUtil.parseObj(message.getData()));
         if (Objects.nonNull(vo)) {
             //不为null的话，转换成字节数组 发送消息
             message.setData(vo);
