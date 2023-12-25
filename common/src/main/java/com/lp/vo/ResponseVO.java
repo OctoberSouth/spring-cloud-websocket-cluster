@@ -20,13 +20,7 @@ public class ResponseVO<T> {
      * 额外数据
      */
     private String message;
-
-    /**
-     * 服务名
-     */
-    private String serverName;
-
-
+    
     /**
      * 具体数据信息，一般用json包装
      */
@@ -49,7 +43,7 @@ public class ResponseVO<T> {
     }
 
     public ResponseVO() {
-        
+
     }
 
     public boolean success() {

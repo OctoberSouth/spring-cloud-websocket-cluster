@@ -12,6 +12,7 @@ import com.lp.enums.ServerEnum;
 import com.lp.feign.EntranceFeign;
 import com.lp.util.LocalCache;
 import com.lp.util.WebSocketUtil;
+import com.lp.vo.ResponseVO;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -194,10 +195,11 @@ public class WebSocket {
             }
         }
         //调用远程服务
-        Message data = this.entranceFeign.entrance(serverName, message.getPath(), userId, language, message);
-        if (Objects.nonNull(data)) {
+        ResponseVO<?> vo = this.entranceFeign.entrance(serverName, message.getPath(), userId, language, JSONUtil.toJsonStr(message.getData()));
+        if (Objects.nonNull(vo)) {
             //不为null的话，转换成字节数组 发送消息
-            session.getAsyncRemote().sendText(JSONUtil.toJsonStr(data));
+            message.setData(vo);
+            session.getAsyncRemote().sendText(JSONUtil.toJsonStr(message));
         }
     }
 

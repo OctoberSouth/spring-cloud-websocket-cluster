@@ -41,7 +41,7 @@ public class PushService {
      * @param userId
      * @param vo
      */
-    public void pushMessage(Message vo, Long... userId) {
+    public void pushMessage(Message<?> vo, Long... userId) {
         for (Long id : userId) {
             List<String> serviceNameList = getServiceName(id);
             serviceNameList.forEach(serviceName -> {
@@ -86,7 +86,7 @@ public class PushService {
      * @param userId
      * @param vo
      */
-    public void pushMessage(Message vo, Set<Long> userId) {
+    public void pushMessage(Message<?> vo, Set<Long> userId) {
         for (Long id : userId) {
             List<String> serviceNameList = getServiceName(id);
             serviceNameList.forEach(serviceName -> this.pushFeign.pushMessage(serviceName.split(":")[0], id, vo));
@@ -98,21 +98,9 @@ public class PushService {
      *
      * @param vo
      */
-    public void pushMessage(Message vo) {
+    public void pushMessage(Message<?> vo) {
         List<String> servicesOfServer = discoveryClient.getServices();
         List<String> list = servicesOfServer.stream().filter(e -> e.startsWith("ws-server")).toList();
         list.forEach(e -> this.pushFeign.pushMessage(e, vo));
-    }
-
-    /**
-     * 同步发送消息，消息发送完后才会返回
-     *
-     * @param userId
-     * @param vo
-     * @return
-     */
-    public void pushMessageFuture(Message vo, Long userId) {
-        List<String> serviceNameList = getServiceName(userId);
-        serviceNameList.forEach(serviceName -> this.pushFeign.pushMessage(serviceName.split(":")[0], userId, vo));
     }
 }

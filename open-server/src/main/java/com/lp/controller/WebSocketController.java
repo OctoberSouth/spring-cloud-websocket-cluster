@@ -44,7 +44,7 @@ public class WebSocketController {
      * @param dto
      */
     @PostMapping("push/all")
-    public ResponseVO<Void> pushAllMessage(@RequestBody @Valid Message dto) {
+    public ResponseVO<Void> pushAllMessage(@RequestBody @Valid Message<?> dto) {
         this.pushService.pushMessage(dto);
         return R.success();
     }
@@ -58,7 +58,7 @@ public class WebSocketController {
      * @param userId
      */
     @PostMapping("push/{userId}")
-    public ResponseVO<Void> pushMessage(@PathVariable Long userId, @RequestBody @Valid Message dto) {
+    public ResponseVO<Void> pushMessage(@PathVariable Long userId, @RequestBody @Valid Message<?> dto) {
         this.pushService.pushMessage(dto, userId);
         return R.success();
     }

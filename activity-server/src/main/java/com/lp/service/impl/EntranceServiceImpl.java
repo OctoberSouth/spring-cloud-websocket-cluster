@@ -15,7 +15,7 @@ import java.util.Objects;
 @Service
 public class EntranceServiceImpl implements EntranceService {
     @Override
-    public ResponseVO operation(Long userId, RequestDTO dto) {
+    public ResponseVO<?> operation(Long userId, RequestDTO dto) {
         if (!Objects.equals(ServerEnum.ACTIVITY, ServerEnum.getEnum(dto.getServerName()))) {
             return null;
         }

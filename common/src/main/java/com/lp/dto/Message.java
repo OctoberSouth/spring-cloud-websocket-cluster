@@ -6,18 +6,14 @@ package com.lp.dto;
 import lombok.Data;
 
 /**
- * ws 发送消息
+ * ws 发送接收消息
  *
  * @author 10263
  */
 @Data
 public class Message<T> {
-    //消息类型
-    private Integer code;
     //路径
     private String path;
-    //额外信息
-    private String message;
     //服务名
     private String serverName;
     //具体数据信息

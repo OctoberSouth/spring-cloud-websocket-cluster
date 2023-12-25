@@ -24,8 +24,6 @@ public class WsTask {
     public void heartbeatTask() {
         WebSocketEnum heartbeat = WebSocketEnum.HEARTBEAT;
         Message demo = new Message();
-        demo.setCode(heartbeat.getCode());
-        demo.setMessage(heartbeat.getMessage());
         demo.setServerName(heartbeat.getServerName());
         demo.setData(JSONUtil.toJsonStr(heartbeat.getData()));
 

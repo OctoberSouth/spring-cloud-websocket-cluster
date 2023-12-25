@@ -2,7 +2,6 @@ package com.lp.util;
 
 import cn.hutool.json.JSONUtil;
 import com.lp.dto.Message;
-import com.lp.dto.MessageDTO;
 import com.lp.enums.DeviceEnum;
 import com.lp.socket.WebSocket;
 
@@ -53,21 +52,7 @@ public class WebSocketUtil {
             }
         }
     }
-
-
-    /**
-     * 批量发送消息
-     *
-     * @param dto
-     */
-    public static void sendMessage(MessageDTO dto) {
-        dto.getUserId().forEach(e -> {
-            Map<DeviceEnum, WebSocket> webSocketMap = get(e);
-            if (Objects.nonNull(webSocketMap)) {
-                webSocketMap.forEach((k, v) -> sendMessage(v, dto.getData()));
-            }
-        });
-    }
+    
 
     /**
      * 实现服务器主动推送
@@ -76,7 +61,7 @@ public class WebSocketUtil {
      * @param vo
      * @return
      */
-    public static void sendMessage(Long userId, Message vo) {
+    public static void sendMessage(Long userId, Message<?> vo) {
         Map<DeviceEnum, WebSocket> webSocketMap = get(userId);
         if (Objects.nonNull(webSocketMap)) {
             webSocketMap.forEach((k, v) -> sendMessage(v, vo));
@@ -98,7 +83,7 @@ public class WebSocketUtil {
      *
      * @param vo
      */
-    public static void sendMessage(Message vo) {
+    public static void sendMessage(Message<?> vo) {
         WEB_SOCKET_MAP.forEach((k, v) -> v.forEach((k1, v2) -> sendMessage(v2, vo)));
     }
 
@@ -108,7 +93,7 @@ public class WebSocketUtil {
      * @param webSocket
      * @param vo
      */
-    private static void sendMessage(WebSocket webSocket, Message vo) {
+    private static void sendMessage(WebSocket webSocket, Message<?> vo) {
         //转换成字节数组
         webSocket.getSession().getAsyncRemote().sendText(JSONUtil.toJsonStr(vo));
     }

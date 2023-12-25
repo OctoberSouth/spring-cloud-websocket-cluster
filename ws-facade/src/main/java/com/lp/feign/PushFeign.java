@@ -2,7 +2,6 @@ package com.lp.feign;
 
 import com.lp.config.DynamicRoutingConfig;
 import com.lp.dto.Message;
-import com.lp.dto.MessageDTO;
 import com.lp.vo.ResponseVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +22,7 @@ public interface PushFeign {
      * @param vo          消息体
      */
     @PostMapping(value = "//{serviceName}/push/{userId}")
-    ResponseVO<Void> pushMessage(@PathVariable("serviceName") String serviceName, @PathVariable("userId") Long userId, @RequestBody Message vo);
+    ResponseVO<Void> pushMessage(@PathVariable("serviceName") String serviceName, @PathVariable("userId") Long userId, @RequestBody Message<?> vo);
 
     /**
      * 群发
@@ -32,15 +31,7 @@ public interface PushFeign {
      * @param vo          消息体
      */
     @PostMapping(value = "//{serviceName}/push")
-    ResponseVO<Void> pushMessage(@PathVariable("serviceName") String serviceName, @RequestBody Message vo);
+    ResponseVO<Void> pushMessage(@PathVariable("serviceName") String serviceName, @RequestBody Message<?> vo);
 
-    /**
-     * 群发
-     *
-     * @param serviceName 服务名
-     * @param dto         消息体
-     */
-    @PostMapping(value = "//{serviceName}/push/batch")
-    ResponseVO<Void> pushBatchMessage(@PathVariable("serviceName") String serviceName, @RequestBody MessageDTO dto);
 
 }

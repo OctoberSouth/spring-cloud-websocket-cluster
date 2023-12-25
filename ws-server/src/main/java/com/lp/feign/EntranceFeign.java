@@ -1,7 +1,7 @@
 package com.lp.feign;
 
 import com.lp.config.DynamicRoutingConfig;
-import com.lp.dto.Message;
+import com.lp.vo.ResponseVO;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +26,6 @@ public interface EntranceFeign {
      * @return ResponseVO
      */
     @PostMapping(value = "//{serviceName}/{path}/{userId}")
-    Message entrance(@PathVariable("serviceName") String serviceName, @PathVariable("path") String path, @PathVariable("userId") Long userId, @RequestHeader("Accept-Language") String language, @RequestBody @Valid Message dto);
+    ResponseVO<?> entrance(@PathVariable("serviceName") String serviceName, @PathVariable("path") String path, @PathVariable("userId") Long userId, @RequestHeader("Accept-Language") String language, @RequestBody @Valid Object dto);
 
 }
