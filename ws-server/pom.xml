@@ -67,11 +67,6 @@
         </dependency>
         <dependency>
             <groupId>com.bt.game</groupId>
-            <artifactId>network-message</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.bt.game</groupId>
             <artifactId>ws-facade</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>

@@ -16,7 +16,6 @@
         <module>activity-server</module>
         <module>open-server</module>
         <module>ws-transit</module>
-        <module>network-message</module>
     </modules>
 
     <parent>

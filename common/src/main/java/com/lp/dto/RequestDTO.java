@@ -7,7 +7,7 @@ import lombok.Data;
  * @author lp
  */
 @Data
-public class RequestDTO {
+public class RequestDTO<T> {
     /**
      * 消息类型
      */
@@ -27,8 +27,8 @@ public class RequestDTO {
 
 
     /**
-     * 具体数据信息，一般用json包装
+     * 具体数据信息
      */
-    private String data;
+    private T data;
 
 }

@@ -21,7 +21,6 @@ https://gitee.com/liupan1230/websocket-cluster-netty
 #### 使用说明
 
 1. 所有服务都可以启动多个，保证了动态扩容
-2. network-message 为基础包，各个服务之间通信类在这个里面
 3. common 为基础包，包含了常用的枚举，比如服务类型、通用返回等数据
 4. gateway-server 为网关服务，重点为WebSocketGatewayFilter类，此可以保证了网关动态连接到ws服务，建议鉴权可以在此处完成，保证连接到websocket的都是有效连接
 5. ws-facade 需要通过其他服务直接给用户发送消息直接集成这个即可

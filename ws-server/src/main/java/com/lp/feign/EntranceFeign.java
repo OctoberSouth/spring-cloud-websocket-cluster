@@ -4,7 +4,6 @@ import com.lp.config.DynamicRoutingConfig;
 import com.lp.dto.Message;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +24,7 @@ public interface EntranceFeign {
      * @param dto         消息体
      * @return ResponseVO
      */
-    @PostMapping(value = "//{serviceName}/entrance/{userId}", consumes = MediaType.APPLICATION_PROTOBUF_VALUE, produces = MediaType.APPLICATION_PROTOBUF_VALUE)
+    @PostMapping(value = "//{serviceName}/entrance/{userId}")
     Message entrance(@PathVariable("serviceName") String serviceName, @PathVariable("userId") Long userId, @RequestHeader("Accept-Language") String language, @RequestBody @Valid Message dto);
 
     /**
@@ -37,7 +36,7 @@ public interface EntranceFeign {
      * @param language         语言
      * @param dto
      */
-    @PostMapping(value = "//{serviceName}/entrance/{socketServerName}/{userId}", consumes = MediaType.APPLICATION_PROTOBUF_VALUE, produces = MediaType.APPLICATION_PROTOBUF_VALUE)
+    @PostMapping(value = "//{serviceName}/entrance/{socketServerName}/{userId}")
     void asyncEntrance(@PathVariable("serviceName") String serviceName, @PathVariable("socketServerName") String socketServerName, @PathVariable("userId") Long userId, @RequestHeader("Accept-Language") String language, @RequestBody @Valid Message dto);
 
 }
