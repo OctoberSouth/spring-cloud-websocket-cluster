@@ -4,11 +4,6 @@
 
 基于spring-cloud与redis的websocket 集群解决方案
 
-## https://gitee.com/liupan1230/websocket-cluster-netty
-
-推荐 netty版本，性能更好，封装更完善，采用protobuf 通信，更可以拿来即用！！！！
-https://gitee.com/liupan1230/websocket-cluster-netty
-
 #### 软件架构
 
 本项目基于spring-cloud 与 redis 做出的websocket集群方案
