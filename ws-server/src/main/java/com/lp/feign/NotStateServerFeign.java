@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 /**
  * @author lp
  */
-@FeignClient(name = "entranceFeign", configuration = DynamicRoutingConfig.class)
-public interface EntranceFeign {
+@FeignClient(name = "notStateServerFeign", configuration = DynamicRoutingConfig.class)
+public interface NotStateServerFeign {
 
     /**
      * 消息通信
@@ -25,5 +25,6 @@ public interface EntranceFeign {
      */
     @PostMapping(value = "//{serviceName}/{path}/{userId}")
     ResponseVO<?> entrance(@PathVariable("serviceName") String serviceName, @PathVariable("path") String path, @PathVariable("userId") Long userId, @RequestBody @Valid Object dto);
+
 
 }

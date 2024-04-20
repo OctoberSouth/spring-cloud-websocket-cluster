@@ -45,7 +45,7 @@ public class PushService {
         for (Long id : userId) {
             List<String> serviceNameList = getServiceName(id);
             serviceNameList.forEach(serviceName -> {
-                this.pushFeign.pushMessage(serviceName.split(":")[0], id, vo);
+                this.pushFeign.pushMessage(serviceName.split("@")[0], id, vo);
             });
         }
     }
@@ -60,7 +60,7 @@ public class PushService {
     private List<String> getServiceName(Long id) {
         List<String> serviceNameList = new ArrayList<>();
         for (DeviceEnum request : DeviceEnum.values()) {
-            String serviceName = LocalCache.wsUser.get(id + ":" + request.getDeviceType());
+            String serviceName = LocalCache.wsUser.get(id + "@" + request.getDeviceType());
             if (StrUtil.isBlank(serviceName)) {
                 long millis = System.currentTimeMillis();
                 if (millis - cacheTime > 1000 * 60 * 5) {
@@ -71,7 +71,7 @@ public class PushService {
                         cacheTime = millis;
                     }
                 }
-                serviceName = LocalCache.wsUser.get(id + ":" + request.getDeviceType());
+                serviceName = LocalCache.wsUser.get(id + "@" + request.getDeviceType());
             }
             if (StrUtil.isNotBlank(serviceName)) {
                 serviceNameList.add(serviceName);
@@ -89,7 +89,7 @@ public class PushService {
     public void pushMessage(Message<?> vo, Set<Long> userId) {
         for (Long id : userId) {
             List<String> serviceNameList = getServiceName(id);
-            serviceNameList.forEach(serviceName -> this.pushFeign.pushMessage(serviceName.split(":")[0], id, vo));
+            serviceNameList.forEach(serviceName -> this.pushFeign.pushMessage(serviceName.split("@")[0], id, vo));
         }
     }
 

@@ -34,7 +34,7 @@ public class UserMqServer {
      *
      * @param uid        用户ID
      * @param server     服务
-     * @param serverName 服务名
+     * @param serverName 服务IP加端口，例如：127.0.0.1:9090
      */
     public void build(Long uid, String server, String serverName) {
         UserServerDTO dto = new UserServerDTO();

@@ -20,12 +20,12 @@ public class WsUserServerListener implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         UserServerDTO userDTO = JSONUtil.toBean(message.toString(), UserServerDTO.class);
-        String key = userDTO.getUserId() + ":" + userDTO.getDevice();
+        String key = userDTO.getUserId() + "@" + userDTO.getDevice();
         if (userDTO.getLogin()) {
-            LocalCache.wsUser.put(key, userDTO.getServerName() + ":" + userDTO.getUuid());
+            LocalCache.wsUser.put(key, userDTO.getServerName() + "@" + userDTO.getUuid());
         } else {
             String value = LocalCache.wsUser.get(key);
-            if (Objects.equals(value, userDTO.getServerName() + ":" + userDTO.getUuid())) {
+            if (Objects.equals(value, userDTO.getServerName() + "@" + userDTO.getUuid())) {
                 LocalCache.wsUser.remove(key);
             }
         }

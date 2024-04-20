@@ -1,8 +1,7 @@
 spring:
   application:
     #随机名字，做ws集群使用
-    name: ${SpringApplicationName}
-  #    name: ws
+    name: ws-server
   cloud:
     nacos:
       server-addr: 192.168.137.47

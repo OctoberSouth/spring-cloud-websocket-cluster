@@ -1,6 +1,7 @@
 package com.lp.socket;
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import com.lp.constants.MqTopicConstants;
@@ -9,7 +10,8 @@ import com.lp.dto.Message;
 import com.lp.dto.UserServerDTO;
 import com.lp.enums.DeviceEnum;
 import com.lp.enums.ServerEnum;
-import com.lp.feign.EntranceFeign;
+import com.lp.feign.NotStateServerFeign;
+import com.lp.feign.StateServerFeign;
 import com.lp.util.LocalCache;
 import com.lp.util.WebSocketUtil;
 import com.lp.vo.ResponseVO;
@@ -18,11 +20,15 @@ import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,10 +42,11 @@ import java.util.Random;
 @Component
 public class WebSocket {
 
-    private final String applicationName = System.getProperty("SpringApplicationName");
     private final StringRedisTemplate stringRedisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
-    private final EntranceFeign entranceFeign = SpringUtil.getBean(EntranceFeign.class);
+    private final StateServerFeign stateServerFeign = SpringUtil.getBean(StateServerFeign.class);
+    private final NotStateServerFeign notStateServerFeign = SpringUtil.getBean(NotStateServerFeign.class);
     private final DiscoveryClient discoveryClient = SpringUtil.getBean(DiscoveryClient.class);
+    private final Environment environment = SpringUtil.getBean(Environment.class);
 
     /**
      * session
@@ -51,11 +58,6 @@ public class WebSocket {
      */
     @Getter
     private Long userId;
-    /**
-     * 语言
-     */
-    @Getter
-    private String language;
     /**
      * 设备
      */
@@ -69,15 +71,20 @@ public class WebSocket {
     private String uuid;
 
     /**
+     * 链接地址
+     */
+    @Getter
+    private String address;
+
+    /**
      * 当有新的WebSocket连接完成时
      *
      * @param session
-     * @param language 语言
-     * @param userId   用户ID
-     * @param device   设备类型
+     * @param userId  用户ID
+     * @param device  设备类型
      */
     @OnOpen
-    public void onOpen(Session session, @PathParam("language") String language, @PathParam("userId") Long userId, @PathParam("device") String device) {
+    public void onOpen(Session session, @PathParam("userId") Long userId, @PathParam("device") String device) throws UnknownHostException {
         if (Objects.isNull(DeviceEnum.getEnum(device))) {
             //设备不匹配直接拒绝连接
             try {
@@ -102,12 +109,12 @@ public class WebSocket {
         //根据token获取用户信息
         this.userId = userId;
         this.device = device;
-        this.language = language;
         this.uuid = IdUtil.simpleUUID();
         WebSocketUtil.putMap(this.userId, this, DeviceEnum.getEnum(device));
-        this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, this.userId + ":" + this.device, this.applicationName + ":" + this.uuid);
+        address = InetAddress.getLocalHost().getHostAddress() + ":" + (StrUtil.isBlank(environment.getProperty("server.port")) ? "8080" : environment.getProperty("server.port"));
+        this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, this.userId + "@" + this.device, address + "@" + this.uuid);
         //通知上线
-        UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", this.applicationName, this.device, this.uuid, true);
+        UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", address, this.device, this.uuid, true);
         this.stringRedisTemplate.convertAndSend(MqTopicConstants.SOCKET_USER_SPRING_APPLICATION, JSONUtil.toJsonStr(userDTO));
     }
 
@@ -138,13 +145,13 @@ public class WebSocket {
         Map<DeviceEnum, WebSocket> webSocketMap = WebSocketUtil.get(this.userId);
         if (Objects.equals(webSocketMap.get(DeviceEnum.getEnum(this.device)).getSession(), session)) {
             //删除缓存信息
-            Object value = this.stringRedisTemplate.opsForHash().get(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, this.userId + ":" + this.device);
-            if (Objects.nonNull(value) && Objects.equals(value.toString(), this.applicationName + ":" + this.uuid)) {
-                this.stringRedisTemplate.opsForHash().delete(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, this.userId + ":" + this.device);
+            Object value = this.stringRedisTemplate.opsForHash().get(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, this.userId + "@" + this.device);
+            if (Objects.nonNull(value) && Objects.equals(value.toString(), this.address + "@" + this.uuid)) {
+                this.stringRedisTemplate.opsForHash().delete(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, this.userId + "@" + this.device);
             }
             WebSocketUtil.removeMap(this.userId, this.device, this.uuid);
             //通知下线
-            UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", this.applicationName, this.device, this.uuid, false);
+            UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", this.address, this.device, this.uuid, false);
             this.stringRedisTemplate.convertAndSend(MqTopicConstants.SOCKET_USER_SPRING_APPLICATION, JSONUtil.toJsonStr(userDTO));
         }
         try {
@@ -168,6 +175,8 @@ public class WebSocket {
         }
         //连接服务名
         String serverName = message.getServerName();
+        //调用远程服务
+        ResponseVO<?> vo;
         if (serverEnum.getState()) {
                 /*
                    有状态服务才需要这样获取
@@ -193,9 +202,10 @@ public class WebSocket {
                 this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.USER_SERVER_NAME_HASH, userId + message.getServerName(), serverName);
                 LocalCache.userServer.put(this.userId + serverName, serverName);
             }
+            vo = this.stateServerFeign.entrance(serverName, message.getPath(), userId, JSONUtil.parseObj(message.getData()));
+        } else {
+            vo = this.notStateServerFeign.entrance(serverName, message.getPath(), userId, JSONUtil.parseObj(message.getData()));
         }
-        //调用远程服务
-        ResponseVO<?> vo = this.entranceFeign.entrance(serverName, message.getPath(), userId, language, JSONUtil.parseObj(message.getData()));
         if (Objects.nonNull(vo)) {
             //不为null的话，转换成字节数组 发送消息
             message.setData(vo);
@@ -210,11 +220,11 @@ public class WebSocket {
      * @return String
      */
     private String getName(String serverName) {
-        List<String> servicesOfServer = discoveryClient.getServices();
-        List<String> list = servicesOfServer.stream().filter(e -> e.startsWith(serverName)).toList();
+        List<ServiceInstance> instances = discoveryClient.getInstances(serverName);
         Random random = new Random();
-        int n = random.nextInt(list.size());
+        int n = random.nextInt(instances.size());
         //根据服务得到服务IP
-        return list.get(n);
+        ServiceInstance instance = instances.get(n);
+        return instance.getHost() + ":" + instance.getPort();
     }
 }

@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 /**
  * @author lp
  */
-@FeignClient(name = "entranceFeign", configuration = DynamicRoutingConfig.class)
-public interface EntranceFeign {
+@FeignClient(name = "stateServerFeign", url = "EMPTY", configuration = DynamicRoutingConfig.class)
+public interface StateServerFeign {
 
     /**
      * 消息通信

@@ -20,7 +20,7 @@ public class ResponseVO<T> {
      * 额外数据
      */
     private String message;
-    
+
     /**
      * 具体数据信息，一般用json包装
      */
