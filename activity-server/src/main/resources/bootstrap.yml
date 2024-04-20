@@ -9,11 +9,6 @@ spring:
   data:
     redis:
       host: 192.168.137.47
-  datasource:
-    url: jdbc:mysql://192.168.137.47:3306/test
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
   threads:
     virtual:
       enabled: true
@@ -23,15 +18,3 @@ server:
 logging:
   level:
     com.lp.feign: debug
-
-#通用mapper
-mapper:
-  mappers:
-    - tk.mybatis.mapper.common.Mapper
-    - com.lp.util.MyMapper
-  notEmpty: true
-  identity: MYSQL
-# 分页
-pagehelper:
-  helperDialect: mysql
-  params: count=countSql

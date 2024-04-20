@@ -16,6 +16,7 @@ public interface NotStateServerFeign {
 
     /**
      * 消息通信
+     * 只要其他服务接口是post请求 有@PathVariable("userId") Long userId, @RequestBody @Valid Object dto 两个字段即可
      *
      * @param serviceName 服务名
      * @param path        请求路径
