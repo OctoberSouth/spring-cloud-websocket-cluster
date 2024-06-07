@@ -31,8 +31,8 @@
         <skipTests>true</skipTests>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
-        <hutool.version>5.8.23</hutool.version>
-        <lombok.version>1.18.30</lombok.version>
+        <hutool.version>5.8.28</hutool.version>
+        <lombok.version>1.18.32</lombok.version>
     </properties>
 
 
