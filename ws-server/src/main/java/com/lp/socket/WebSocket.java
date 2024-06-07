@@ -12,6 +12,7 @@ import com.lp.enums.DeviceEnum;
 import com.lp.enums.ServerEnum;
 import com.lp.feign.NotStateServerFeign;
 import com.lp.feign.StateServerFeign;
+import com.lp.pool.MessageUserPool;
 import com.lp.util.LocalCache;
 import com.lp.util.WebSocketUtil;
 import com.lp.vo.ResponseVO;
@@ -163,54 +164,57 @@ public class WebSocket {
 
 
     @OnMessage
-    public void onMessage(Session session, String bytes) {
+    public void onMessage(Session session, @PathParam("userId") Long userId, String bytes) {
         //此举是为了保证消息的有序性
         //反序列化 转成对应Java对象
-        Message message = JSONUtil.toBean(bytes, Message.class);
-        //获取服务名
-        ServerEnum serverEnum = ServerEnum.getEnum(message.getServerName());
-        if (Objects.isNull(serverEnum)) {
-            //服务为空不处理
-            return;
-        }
-        //连接服务名
-        String serverName = message.getServerName();
-        //调用远程服务
-        ResponseVO<?> vo;
-        if (serverEnum.getState()) {
+        //按用户区分，采用异步处理
+        MessageUserPool.getMessageUserPool(userId).execute(() -> {
+            Message message = JSONUtil.toBean(bytes, Message.class);
+            //获取服务名
+            ServerEnum serverEnum = ServerEnum.getEnum(message.getServerName());
+            if (Objects.isNull(serverEnum)) {
+                //服务为空不处理
+                return;
+            }
+            //连接服务名
+            String serverName = message.getServerName();
+            //调用远程服务
+            ResponseVO<?> vo;
+            if (serverEnum.getState()) {
                 /*
                    有状态服务才需要这样获取
                  */
-            serverName = LocalCache.userServer.get(this.userId + serverName);
-            if (Objects.isNull(serverName)) {
-                //这样可以指定用户访问到指定的服务
-                Object server = this.stringRedisTemplate.opsForHash().get(RedisKeyConstants.USER_SERVER_NAME_HASH, message.getServerName() + userId);
-                if (Objects.isNull(server)) {
-                    //随机获取一个
-                    serverName = getName(message.getServerName());
-                    this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.USER_SERVER_NAME_HASH, message.getServerName() + userId, serverName);
-                } else {
-                    serverName = server.toString();
+                serverName = LocalCache.userServer.get(this.userId + serverName);
+                if (Objects.isNull(serverName)) {
+                    //这样可以指定用户访问到指定的服务
+                    Object server = this.stringRedisTemplate.opsForHash().get(RedisKeyConstants.USER_SERVER_NAME_HASH, message.getServerName() + userId);
+                    if (Objects.isNull(server)) {
+                        //随机获取一个
+                        serverName = getName(message.getServerName());
+                        this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.USER_SERVER_NAME_HASH, message.getServerName() + userId, serverName);
+                    } else {
+                        serverName = server.toString();
+                    }
+                    LocalCache.userServer.put(this.userId + serverName, serverName);
                 }
-                LocalCache.userServer.put(this.userId + serverName, serverName);
+                List<String> servicesOfServer = discoveryClient.getServices();
+                if (!servicesOfServer.contains(serverName)) {
+                    //如果不在服务列表里面，说明服务已经重启过，还是要随机获取一个
+                    serverName = getName(message.getServerName());
+                    //添加到缓存里面
+                    this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.USER_SERVER_NAME_HASH, userId + message.getServerName(), serverName);
+                    LocalCache.userServer.put(this.userId + serverName, serverName);
+                }
+                vo = this.stateServerFeign.entrance(serverName, message.getPath(), userId, JSONUtil.parseObj(message.getData()));
+            } else {
+                vo = this.notStateServerFeign.entrance(serverName, message.getPath(), userId, JSONUtil.parseObj(message.getData()));
             }
-            List<String> servicesOfServer = discoveryClient.getServices();
-            if (!servicesOfServer.contains(serverName)) {
-                //如果不在服务列表里面，说明服务已经重启过，还是要随机获取一个
-                serverName = getName(message.getServerName());
-                //添加到缓存里面
-                this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.USER_SERVER_NAME_HASH, userId + message.getServerName(), serverName);
-                LocalCache.userServer.put(this.userId + serverName, serverName);
+            if (Objects.nonNull(vo)) {
+                //不为null的话，转换成字节数组 发送消息
+                message.setData(vo);
+                session.getAsyncRemote().sendText(JSONUtil.toJsonStr(message));
             }
-            vo = this.stateServerFeign.entrance(serverName, message.getPath(), userId, JSONUtil.parseObj(message.getData()));
-        } else {
-            vo = this.notStateServerFeign.entrance(serverName, message.getPath(), userId, JSONUtil.parseObj(message.getData()));
-        }
-        if (Objects.nonNull(vo)) {
-            //不为null的话，转换成字节数组 发送消息
-            message.setData(vo);
-            session.getAsyncRemote().sendText(JSONUtil.toJsonStr(message));
-        }
+        });
     }
 
     /**
