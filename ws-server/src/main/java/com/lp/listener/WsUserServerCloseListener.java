@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.lp.dto.UserServerDTO;
 import com.lp.enums.DeviceEnum;
-import com.lp.socket.WebSocket;
+import com.lp.pojo.WebSocketInfo;
 import com.lp.util.WebSocketUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.Message;
@@ -31,7 +31,7 @@ public class WsUserServerCloseListener implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         UserServerDTO wsUser = JSONUtil.toBean(message.toString(), UserServerDTO.class);
-        Map<DeviceEnum, WebSocket> webSocketMap = WebSocketUtil.get(wsUser.getUserId());
+        Map<DeviceEnum, WebSocketInfo> webSocketMap = WebSocketUtil.get(wsUser.getUserId());
         String address;
         try {
             address = InetAddress.getLocalHost().getHostAddress() + ":" + port;
@@ -41,7 +41,7 @@ public class WsUserServerCloseListener implements MessageListener {
         //不是同个客户端，挤下线
         if (Objects.nonNull(webSocketMap) && StrUtil.isNotBlank(wsUser.getServerName()) && !Objects.equals(wsUser.getServerName(), address)) {
             try {
-                WebSocket webSocket = webSocketMap.get(DeviceEnum.getEnum(wsUser.getDevice()));
+                WebSocketInfo webSocket = webSocketMap.get(DeviceEnum.getEnum(wsUser.getDevice()));
                 if (Objects.nonNull(webSocket)) {
                     webSocket.getSession().close();
                 }

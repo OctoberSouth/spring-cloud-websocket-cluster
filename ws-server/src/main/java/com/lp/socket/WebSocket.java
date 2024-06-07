@@ -12,6 +12,7 @@ import com.lp.enums.DeviceEnum;
 import com.lp.enums.ServerEnum;
 import com.lp.feign.NotStateServerFeign;
 import com.lp.feign.StateServerFeign;
+import com.lp.pojo.WebSocketInfo;
 import com.lp.pool.MessageUserPool;
 import com.lp.util.LocalCache;
 import com.lp.util.WebSocketUtil;
@@ -19,7 +20,6 @@ import com.lp.vo.ResponseVO;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -49,33 +49,6 @@ public class WebSocket {
     private final DiscoveryClient discoveryClient = SpringUtil.getBean(DiscoveryClient.class);
     private final Environment environment = SpringUtil.getBean(Environment.class);
 
-    /**
-     * session
-     */
-    @Getter
-    private Session session;
-    /**
-     * 用户ID
-     */
-    @Getter
-    private Long userId;
-    /**
-     * 设备
-     */
-    @Getter
-    private String device;
-
-    /**
-     * 连接生成唯一ID
-     */
-    @Getter
-    private String uuid;
-
-    /**
-     * 链接地址
-     */
-    @Getter
-    private String address;
 
     /**
      * 当有新的WebSocket连接完成时
@@ -94,11 +67,11 @@ public class WebSocket {
                 throw new RuntimeException(e);
             }
         }
-        Map<DeviceEnum, WebSocket> webSocketMap = WebSocketUtil.get(userId);
+        Map<DeviceEnum, WebSocketInfo> webSocketMap = WebSocketUtil.get(userId);
         if (Objects.nonNull(webSocketMap)) {
             //关闭重复连接
             try {
-                WebSocket webSocket = webSocketMap.get(DeviceEnum.getEnum(device));
+                WebSocketInfo webSocket = webSocketMap.get(DeviceEnum.getEnum(device));
                 if (Objects.nonNull(webSocket)) {
                     webSocket.getSession().close();
                 }
@@ -106,16 +79,17 @@ public class WebSocket {
                 throw new RuntimeException(e);
             }
         }
-        this.session = session;
+        WebSocketInfo webSocket = new WebSocketInfo();
+        webSocket.setSession(session);
         //根据token获取用户信息
-        this.userId = userId;
-        this.device = device;
-        this.uuid = IdUtil.simpleUUID();
-        WebSocketUtil.putMap(this.userId, this, DeviceEnum.getEnum(device));
-        address = InetAddress.getLocalHost().getHostAddress() + ":" + (StrUtil.isBlank(environment.getProperty("server.port")) ? "8080" : environment.getProperty("server.port"));
-        this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, this.userId + "@" + this.device, address + "@" + this.uuid);
+        webSocket.setUserId(userId);
+        webSocket.setDevice(device);
+        webSocket.setUuid(IdUtil.simpleUUID());
+        webSocket.setAddress(InetAddress.getLocalHost().getHostAddress() + ":" + (StrUtil.isBlank(environment.getProperty("server.port")) ? "8080" : environment.getProperty("server.port")));
+        WebSocketUtil.putMap(userId, webSocket, DeviceEnum.getEnum(device));
+        this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, userId + "@" + device, webSocket.getAddress() + "@" + webSocket.getUuid());
         //通知上线
-        UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", address, this.device, this.uuid, true);
+        UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", webSocket.getAddress(), device, webSocket.getUuid(), true);
         this.stringRedisTemplate.convertAndSend(MqTopicConstants.SOCKET_USER_SPRING_APPLICATION, JSONUtil.toJsonStr(userDTO));
     }
 
@@ -123,17 +97,17 @@ public class WebSocket {
      * 当有WebSocket连接关闭时
      */
     @OnClose
-    public void onClose(Session session) {
-        close(session);
+    public void onClose(Session session, @PathParam("userId") Long userId, @PathParam("device") String device) {
+        close(session, userId, device);
     }
 
     /**
      * 当有WebSocket抛出异常时
      */
     @OnError
-    public void onError(Session session, Throwable throwable) {
+    public void onError(Session session, @PathParam("userId") Long userId, @PathParam("device") String device, Throwable throwable) {
         //删除缓存信息
-        close(session);
+        close(session, userId, device);
         log.error("WebSocket异常关闭：{},用户：{}，设备：{}", throwable, userId, device);
     }
 
@@ -142,17 +116,18 @@ public class WebSocket {
      *
      * @param session
      */
-    private void close(Session session) {
-        Map<DeviceEnum, WebSocket> webSocketMap = WebSocketUtil.get(this.userId);
-        if (Objects.equals(webSocketMap.get(DeviceEnum.getEnum(this.device)).getSession(), session)) {
+    private void close(Session session, @PathParam("userId") Long userId, @PathParam("device") String device) {
+        Map<DeviceEnum, WebSocketInfo> webSocketMap = WebSocketUtil.get(userId);
+        WebSocketInfo webSocketInfo = webSocketMap.get(DeviceEnum.getEnum(device));
+        if (Objects.equals(webSocketInfo.getSession(), session)) {
             //删除缓存信息
-            Object value = this.stringRedisTemplate.opsForHash().get(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, this.userId + "@" + this.device);
-            if (Objects.nonNull(value) && Objects.equals(value.toString(), this.address + "@" + this.uuid)) {
-                this.stringRedisTemplate.opsForHash().delete(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, this.userId + "@" + this.device);
+            Object value = this.stringRedisTemplate.opsForHash().get(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, userId + "@" + device);
+            if (Objects.nonNull(value) && Objects.equals(value.toString(), webSocketInfo.getAddress() + "@" + webSocketInfo.getUuid())) {
+                this.stringRedisTemplate.opsForHash().delete(RedisKeyConstants.SOCKET_USER_SPRING_APPLICATION_NAME, userId + "@" + device);
             }
-            WebSocketUtil.removeMap(this.userId, this.device, this.uuid);
+            WebSocketUtil.removeMap(userId, device, webSocketInfo.getUuid());
             //通知下线
-            UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", this.address, this.device, this.uuid, false);
+            UserServerDTO userDTO = new UserServerDTO(userId, "ws-server", webSocketInfo.getAddress(), device, webSocketInfo.getUuid(), false);
             this.stringRedisTemplate.convertAndSend(MqTopicConstants.SOCKET_USER_SPRING_APPLICATION, JSONUtil.toJsonStr(userDTO));
         }
         try {
@@ -184,7 +159,7 @@ public class WebSocket {
                 /*
                    有状态服务才需要这样获取
                  */
-                serverName = LocalCache.userServer.get(this.userId + serverName);
+                serverName = LocalCache.userServer.get(userId + serverName);
                 if (Objects.isNull(serverName)) {
                     //这样可以指定用户访问到指定的服务
                     Object server = this.stringRedisTemplate.opsForHash().get(RedisKeyConstants.USER_SERVER_NAME_HASH, message.getServerName() + userId);
@@ -195,7 +170,7 @@ public class WebSocket {
                     } else {
                         serverName = server.toString();
                     }
-                    LocalCache.userServer.put(this.userId + serverName, serverName);
+                    LocalCache.userServer.put(userId + serverName, serverName);
                 }
                 List<String> servicesOfServer = discoveryClient.getServices();
                 if (!servicesOfServer.contains(serverName)) {
@@ -203,7 +178,7 @@ public class WebSocket {
                     serverName = getName(message.getServerName());
                     //添加到缓存里面
                     this.stringRedisTemplate.opsForHash().put(RedisKeyConstants.USER_SERVER_NAME_HASH, userId + message.getServerName(), serverName);
-                    LocalCache.userServer.put(this.userId + serverName, serverName);
+                    LocalCache.userServer.put(userId + serverName, serverName);
                 }
                 vo = this.stateServerFeign.entrance(serverName, message.getPath(), userId, JSONUtil.parseObj(message.getData()));
             } else {

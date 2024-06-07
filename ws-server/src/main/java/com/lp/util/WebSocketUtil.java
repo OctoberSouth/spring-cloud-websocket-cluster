@@ -3,7 +3,7 @@ package com.lp.util;
 import cn.hutool.json.JSONUtil;
 import com.lp.dto.Message;
 import com.lp.enums.DeviceEnum;
-import com.lp.socket.WebSocket;
+import com.lp.pojo.WebSocketInfo;
 
 import java.util.Map;
 import java.util.Objects;
@@ -19,7 +19,7 @@ public class WebSocketUtil {
     /**
      * 存放用户信息
      */
-    private static final ConcurrentHashMap<Long, ConcurrentHashMap<DeviceEnum, WebSocket>> WEB_SOCKET_MAP = new ConcurrentHashMap<>(16);
+    private static final ConcurrentHashMap<Long, ConcurrentHashMap<DeviceEnum, WebSocketInfo>> WEB_SOCKET_MAP = new ConcurrentHashMap<>(16);
 
 
     /**
@@ -28,8 +28,8 @@ public class WebSocketUtil {
      * @param userId
      * @param webSocket
      */
-    public static void putMap(Long userId, WebSocket webSocket, DeviceEnum deviceEnum) {
-        ConcurrentHashMap<DeviceEnum, WebSocket> webSocketMap = get(userId);
+    public static void putMap(Long userId, WebSocketInfo webSocket, DeviceEnum deviceEnum) {
+        ConcurrentHashMap<DeviceEnum, WebSocketInfo> webSocketMap = get(userId);
         if (Objects.isNull(webSocketMap)) {
             webSocketMap = new ConcurrentHashMap<>(16);
         }
@@ -44,9 +44,9 @@ public class WebSocketUtil {
      */
     public static void removeMap(Long userId, String device, String uuid) {
         DeviceEnum deviceEnum = DeviceEnum.getEnum(device);
-        ConcurrentHashMap<DeviceEnum, WebSocket> webSocketMap = get(userId);
+        ConcurrentHashMap<DeviceEnum, WebSocketInfo> webSocketMap = get(userId);
         if (Objects.nonNull(webSocketMap) && Objects.nonNull(deviceEnum)) {
-            WebSocket webSocket = webSocketMap.get(deviceEnum);
+            WebSocketInfo webSocket = webSocketMap.get(deviceEnum);
             if (Objects.nonNull(webSocket) && Objects.equals(webSocket.getUuid(), uuid)) {
                 webSocketMap.remove(deviceEnum);
             }
@@ -62,7 +62,7 @@ public class WebSocketUtil {
      * @return
      */
     public static void sendMessage(Long userId, Message<?> vo) {
-        Map<DeviceEnum, WebSocket> webSocketMap = get(userId);
+        Map<DeviceEnum, WebSocketInfo> webSocketMap = get(userId);
         if (Objects.nonNull(webSocketMap)) {
             webSocketMap.forEach((k, v) -> sendMessage(v, vo));
         }
@@ -74,7 +74,7 @@ public class WebSocketUtil {
      * @param userId
      * @return
      */
-    public static ConcurrentHashMap<DeviceEnum, WebSocket> get(Long userId) {
+    public static ConcurrentHashMap<DeviceEnum, WebSocketInfo> get(Long userId) {
         return WEB_SOCKET_MAP.get(userId);
     }
 
@@ -93,7 +93,7 @@ public class WebSocketUtil {
      * @param webSocket
      * @param vo
      */
-    private static void sendMessage(WebSocket webSocket, Message<?> vo) {
+    private static void sendMessage(WebSocketInfo webSocket, Message<?> vo) {
         //转换成字节数组
         webSocket.getSession().getAsyncRemote().sendText(JSONUtil.toJsonStr(vo));
     }
